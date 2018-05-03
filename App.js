@@ -9,17 +9,15 @@ import {
   Platform,
   StyleSheet,
   Text,
-  View
+  View,
+  FlatList,
+  StatusBar,
+  ScrollView,
+  Modal
 } from 'react-native';
 import {LocaleConfig, Calendar, CalendarList, Agenda } from 'react-native-calendars';
 import moment from 'moment';
-
-// const instructions = Platform.select({
-//   ios: 'Press Cmd+R to reload,\n' +
-//     'Cmd+D or shake for dev menu',
-//   android: 'Double tap R on your keyboard to reload,\n' +
-//     'Shake or press menu button for dev menu',
-// });
+import { Icon } from 'react-native-elements';
 
 LocaleConfig.locales['kh'] = {
   monthNames: ['មករា','កុម្ភៈ','មីនា','មេសា','ឧសភា','មិថុនា','កក្កដា','សីហា','កញ្ញា','តុលា','វិច្ឆិកា','ធ្នូ'],
@@ -32,18 +30,18 @@ LocaleConfig.defaultLocale = 'kh';
 
 const customStyle = {
     currentDayCircle: {
-      backgroundColor: 'blue',
+      backgroundColor: 'gray',
     },
     eventIndicatorFiller: {
-      backgroundColor: 'blue',
+      backgroundColor: 'gray',
       width: 10,
       height: 10,
     },
      hasEventText: {
-      backgroundColor: 'blue',
+      backgroundColor: 'gray',
     },
     weekRow: {
-      backgroundColor: 'blue',
+      backgroundColor: 'gray',
     },
   }
 
@@ -51,14 +49,11 @@ const themeStyle = {
             backgroundColor: '#ffffff',
             calendarBackground: '#00DDFF',
             textSectionTitleColor: '#b6c1cd',
-            selectedDayBackgroundColor: '#00adf5',
+            selectedDayBackgroundColor: '#EB3933',
             selectedDayTextColor: '#ffffff',
             todayTextColor: '#00adf5',
-            dayTextColor: '#2d4150',
-            textDisabledColor: '#d9e1e8',
-            dotColor: '#00adf5',
-            selectedDotColor: '#87ED54',
-            arrowColor: 'orange',
+            dayTextColor: '#2d4150',                           
+            arrowColor: 'blue',
             monthTextColor: 'blue',
             textDayFontFamily: 'Khmer OS Battambang',
             textMonthFontFamily: 'Khmer OS Battambang',
@@ -69,28 +64,93 @@ const themeStyle = {
             textDayHeaderFontSize: 14
 }
 
+const _format = 'YYYY-MM-DD'
+const _today = moment().format(_format)
+const _maxDate = moment().add(15, 'days').format(_format)
+const _formatView = 'DD MMMM, YYYY'
 type Props = {};
 export default class App extends Component<Props> {
-  constructor(props) {
-    super(props);
-    this.state = {};
-    this.onDayPress = this.onDayPress.bind(this);
+
+  initialState = {
+      [_today]: {disabled: true}
   }
 
+  constructor(props) {
+    super(props);
+    this.state = {
+       _markedDates: this.initialState,
+       collectMarkedDate: {},
+       modalVisible: false,
+       _infoDate:{date:'',event:'',description:''},
+       eventArr:[],
+    };   
+  }
+
+  setModalVisible(visible) {
+    this.setState({modalVisible: visible});
+  }
+
+  onDaySelect = (day) => {
+      this.setModalVisible(true);
+      const _selectedDay = moment(day.dateString).format(_format);
+      
+      let marked = true;
+      let markedDates = { 
+             '2018-05-01': {selected: true, marked: true},
+             '2018-05-07': {marked: true},
+             '2018-05-19': {disabled: true}
+            }
+      if (this.state._markedDates[_selectedDay]) {
+        // Already in marked dates, so reverse current marked state
+        marked = !this.state._markedDates[_selectedDay].marked;
+        markedDates = this.state._markedDates[_selectedDay];
+      }
+      
+      markedDates = {...markedDates, ...{ marked }};
+      
+      // Create a new object using object property spread since it should be immutable
+      // Reading: https://davidwalsh.name/merge-objects
+      const updatedMarkedDates = {...this.state._markedDates, ...{ [_selectedDay]: markedDates } }
+      
+      // Triggers component to render again, picking up the new state
+      this.setState({ _markedDates: updatedMarkedDates });
+  }
+
+  componentWillMount () {
+    this.setState({
+      collectMarkedDate : { 
+              '2018-05-01': {selected: true, marked: true},
+              '2018-05-07': {marked: true},
+              '2018-05-19': {disabled: true,selected: true}
+            },
+        eventArr:[
+          { key:moment('2018-05-01').format(_formatView),title:'bun 1',description:'public holiday'},
+          { key:moment('2018-05-02').format(_formatView),title:'bun 2',description:'public holiday'},
+          { key:moment('2018-05-03').format(_formatView),title:'bun 2',description:'public holiday' },
+          ]
+    })
+  }
+  
+  
   render() {
-    return (
-      <View>
+    return (      
+      <View>  
+      <StatusBar
+        backgroundColor="blue"
+        barStyle="light-content"
+      />
+      <Text style={styles.header}>
+        ប្រតិទិនខ្មែរ
+      </Text>  
+      <ScrollView>
       <Calendar
-            showEventIndicators={true}
-            eventDates={['2018-05-01', '2018-15-07', '2018-05-19']}               
-            // Initially visible month. Default = Date()
-            current={moment().format('YYYY-MM-DD')}
+            showEventIndicators={true}            
+            current={_today}
+            markedDates={this.state.collectMarkedDate}         
             // Minimum date that can be selected, dates before minDate will be grayed out. Default = undefined
             minDate={'2018-01-01'}
             // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
-            maxDate={'2018-12-31'}
-            // Handler which gets executed on day press. Default = undefined
-            onDayPress={(day) => {console.log('selected day', day)}}
+            maxDate={'2018-12-31'}            
             // Handler which gets executed on day long press. Default = undefined
             onDayLongPress={(day) => {console.log('selected day', day)}}
             // Month format in calendar title. Formatting values: http://arshaw.com/xdate/#Formatting
@@ -129,18 +189,41 @@ export default class App extends Component<Props> {
           onTitlePress={this.onTitlePress}  // Callback on title press
           //renderDay={<CustomDay />}         // Optionally render a custom day component
           customStyle={customStyle}  
-          onDayPress={this.onDayPress} 
-          />                
+          onDayPress={this.onDaySelect}
+          />     
+          <Text style={styles.info}>
+           ពត៍មានអំពីថ្ងៃនីមួយៗ
+          </Text>   
+         <FlatList
+          data={this.state.eventArr}
+          renderItem={({item}) => 
+          <Text style={styles.item}>
+               <Icon name="schedule"/>
+               <Text style={styles.title}> {item.title} </Text>
+               <Text style={styles.date}> {item.key} </Text>
+               <Text style={styles.key}> {item.description} </Text>
+          </Text>}
+        />           
+       </ScrollView> 
+       <Modal
+          animationType="slide"
+          transparent={false}
+          visible={this.state.modalVisible}
+          onRequestClose={() => {
+            this.setModalVisible(false);
+          }}>
+          <View>
+            <Text style={styles.info}>
+              ពត៍មានសម្រាប់ថ្ងៃ
+            </Text>   
+            <View>
+              <Text>Hello World!</Text>            
+            </View>
+          </View>
+        </Modal>
       </View>
     );
   }
-
-  onDayPress(day) {
-    this.setState({
-      selected: day.dateString
-    });
-  }
-
 }
 
 const styles = StyleSheet.create({
@@ -154,11 +237,25 @@ const styles = StyleSheet.create({
         width:'100%',
         paddingBottom:10,
     },
-    text: {
+    header: {
+        fontFamily:'Khmer Os Battambang',
         textAlign: 'center',
         borderColor: '#bbb',
+        color:"#ffffff",
         padding: 10,
-        backgroundColor: '#eee'
+        fontWeight: 'bold',
+        fontSize:26,
+        backgroundColor: '#0050D1'
+    },
+    info:{
+      fontFamily:'Khmer Os Battambang',
+        textAlign: 'left',
+        borderColor: '#bbb',
+        color:"#ffffff",
+        padding: 10,
+        fontWeight: 'bold',
+        fontSize:20,
+        backgroundColor: '#0050D1'
     },
     container: {
         flex: 1,
@@ -174,4 +271,27 @@ const styles = StyleSheet.create({
     color: '#333333',
     marginBottom: 5,
   },
+  item: {
+    padding: 10,
+    fontSize: 14,
+    fontFamily:'Khmer Os Battambang',
+    borderBottomWidth:1,
+    borderColor:'#E5E5EB',
+    backgroundColor:'#B7EBCF',
+    height:'auto',
+  },
+    title:{
+      fontFamily:'Khmer Os Battambang',
+      fontSize:16,
+    },
+    description:{
+       flex: 1,
+       fontFamily:'Khmer Os Battambang',
+       fontSize:12,
+    },
+    date:{
+       fontFamily:'Khmer Os Battambang',
+       fontSize:12,
+    }
+ 
 });
