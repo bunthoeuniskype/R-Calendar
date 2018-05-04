@@ -17,7 +17,8 @@ import {
 } from 'react-native';
 import {LocaleConfig, Calendar, CalendarList, Agenda } from 'react-native-calendars';
 import moment from 'moment';
-import { Icon } from 'react-native-elements';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import SplashScreen from 'react-native-splash-screen'
 
 LocaleConfig.locales['kh'] = {
   monthNames: ['មករា','កុម្ភៈ','មីនា','មេសា','ឧសភា','មិថុនា','កក្កដា','សីហា','កញ្ញា','តុលា','វិច្ឆិកា','ធ្នូ'],
@@ -67,7 +68,7 @@ const themeStyle = {
 const _format = 'YYYY-MM-DD'
 const _today = moment().format(_format)
 const _maxDate = moment().add(15, 'days').format(_format)
-const _formatView = 'DD MMMM, YYYY'
+const _formatView = 'DD'
 type Props = {};
 export default class App extends Component<Props> {
 
@@ -131,6 +132,9 @@ export default class App extends Component<Props> {
     })
   }
   
+   componentDidMount() {
+        SplashScreen.hide();
+    }
   
   render() {
     return (      
@@ -197,12 +201,11 @@ export default class App extends Component<Props> {
          <FlatList
           data={this.state.eventArr}
           renderItem={({item}) => 
-          <Text style={styles.item}>
-               <Icon name="schedule"/>
-               <Text style={styles.title}> {item.title} </Text>
-               <Text style={styles.date}> {item.key} </Text>
-               <Text style={styles.key}> {item.description} </Text>
-          </Text>}
+               <View style={styles.item}>              
+                <Text style={styles.date}> {item.key} </Text>
+                <Text style={styles.title}> {item.title} </Text>             
+                <Text style={styles.key}> {item.description} </Text>
+               </View>}
         />           
        </ScrollView> 
        <Modal
@@ -227,7 +230,12 @@ export default class App extends Component<Props> {
 }
 
 const styles = StyleSheet.create({
-  
+      circle: {
+        width: 50,
+        height: 50,
+        borderRadius: 50/2,
+        backgroundColor: 'red'
+    },  
    calendar: {
         borderTopWidth: 1,
         paddingTop: 5,
@@ -272,15 +280,14 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   item: {
-    padding: 10,
-    fontSize: 14,
-    fontFamily:'Khmer Os Battambang',
+    padding: 10,   
     borderBottomWidth:1,
     borderColor:'#E5E5EB',
     backgroundColor:'#B7EBCF',
     height:'auto',
   },
-    title:{
+    title:{    
+      color:'blue', 
       fontFamily:'Khmer Os Battambang',
       fontSize:16,
     },
@@ -290,8 +297,15 @@ const styles = StyleSheet.create({
        fontSize:12,
     },
     date:{
+       padding:4,
+       backgroundColor:'red',
+       width: 35,
+       height: 35,
+       borderRadius: 35/2,
        fontFamily:'Khmer Os Battambang',
-       fontSize:12,
+       fontWeight:'bold',
+       color:'white',
+       fontSize:18,
     }
  
 });
