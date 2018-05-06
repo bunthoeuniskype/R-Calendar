@@ -18,7 +18,7 @@ import {
 import {LocaleConfig, Calendar, CalendarList, Agenda } from 'react-native-calendars';
 import moment from 'moment';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import SplashScreen from 'react-native-splash-screen'
+import SplashScreen from 'react-native-splash-screen';
 
 LocaleConfig.locales['kh'] = {
   monthNames: ['មករា','កុម្ភៈ','មីនា','មេសា','ឧសភា','មិថុនា','កក្កដា','សីហា','កញ្ញា','តុលា','វិច្ឆិកា','ធ្នូ'],

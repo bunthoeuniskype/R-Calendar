@@ -7,11 +7,11 @@
     "test": "jest"
   },
   "dependencies": {
-    "@remobile/react-native-splashscreen": "^1.0.8",
     "moment": "^2.22.1",
     "react": "16.3.1",
     "react-native": "0.55.3",
     "react-native-calendars": "^1.19.3",
+    "react-native-splash-screen": "^3.0.6",
     "react-native-vector-icons": "^4.6.0"
   },
   "devDependencies": {
