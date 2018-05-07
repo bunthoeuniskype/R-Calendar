@@ -70,6 +70,38 @@ const _today = moment().format(_format)
 const _maxDate = moment().add(15, 'days').format(_format)
 const _formatView = 'DD'
 type Props = {};
+
+
+const DataArr = [
+{"date":"2018-01-01","month":"1","day": "1 មករា", "title": "ចូលឆ្នាំសកល"},
+{"date":"2018-01-07","month":"1","day": "7 មករា", "title": "ទិវាជ័យជំនះ៧មករា"},
+{"date":"2018-01-31","month":"1","day": "31 មករា", "title": "ពិធីបុណ្យមាឃបូជា"},
+{"date":"2018-03-08","month":"3","day": "8 មីនា", "title": "ទិវានារីអន្តរជាតិ"},
+{"date":"2018-04-14","month":"4","day": "14 មេសា", "title": "ចូលឆ្នាំចសំរិទ្ធស័ក្ក"},
+{"date":"2018-04-15","month":"4","day": "15 មេសា", "title": "វិរះវនបត"},
+{"date":"2018-04-16","month":"4","day": "16 មេសា", "title": "វិរះឡើងស័ក"},
+{"date":"2018-04-29","month":"4","day": "29 មេសា", "title": "ពិធីបុណ្យវិសាខបូជា"},
+{"date":"2018-05-01","month":"5","day": "1 ឧសភា", "title": "ទិវាពលកម្មអន្តរជាតិឺ"},
+{"date":"2018-05-03","month":"5","day": "3 ឧសភា", "title": "ច្រត់ព្រះនង្គ័ល"},
+{"date":"2018-05-13","month":"5","day": "13 ឧសភា", "title": "ព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្នព្រះមហាក្សត្រ"},
+{"date":"2018-05-14","month":"5","day": "14 ឧសភា", "title": "ព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្នព្រះមហាក្សត្រ"},
+{"date":"2018-05-15","month":"5","day": "15 ឧសភា", "title": "ព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្នព្រះមហាក្សត្រ"},
+{"date":"2018-06-01","month":"6","day": "1 មិថុនា", "title": "ទិវាកុមារអន្តរជាតិ"},
+{"date":"2018-06-18","month":"6","day": "18 មិថុនា", "title": "ពិធីបុណ្យចម្រើនព្រះជន្នស្តេចម៉ែ"},
+{"date":"2018-09-24","month":"9","day": "24 កញ្ញា", "title": "ទិវាប្រកាសប្រើរដ្ឋធម្មនុញ្ញ"},
+{"date":"2018-10-08","month":"10","day": "8 តុលា", "title": "ពិធីបុណ្យភ្ជុំបិណ្ឌ"},
+{"date":"2018-10-09","month":"10","day": "9 តុលា", "title": "ពិធីបុណ្យភ្ជុំបិណ្ឌ"},
+{"date":"2018-10-10","month":"10","day": "10 តុលា", "title": "ពិធីបុណ្យភ្ជុំបិណ្ឌ"},
+{"date":"2018-10-15","month":"10","day": "15 តុលា", "title": "គោរពវិ.ព្រះបរមរតនកោដ្ធ"},
+{"date":"2018-10-23","month":"10","day": "23 តុលា", "title": "សន្តិសញ្ញាសន្តិភាពទីក្រុងប៉ារីស"},
+{"date":"2018-10-29","month":"10","day": "29 តុលា", "title": "ទិវារាជភិសេកព្រះករុណាព្រះបាទសម្តេចព្រះបរមនាថនរោត្តមសីហមុនី"},
+{"date":"2018-11-09","month":"11","day": "9 វិច្ឆិកា", "title": "ទិវាបុណ្យឯករាជ្យ"},
+{"date":"2018-11-21","month":"11","day": "21 វិច្ឆិកា", "title": "ព្រះរាជពិធីបុណ្យអុំទូក"},
+{"date":"2018-11-22","month":"11","day": "22 វិច្ឆិកា", "title": "ព្រះរាជពិធីបុណ្យអុំទូក"},
+{"date":"2018-11-23","month":"11","day": "23 វិច្ឆិកា", "title": "ព្រះរាជពិធីបុណ្យអុំទូក"},
+{"date":"2018-12-10","month":"12","day": "10 ធ្នូ", "title": "ទិវាសិទិ្ធមនុស្សអន្តរជាតិ"}
+];
+
 export default class App extends Component<Props> {
 
   initialState = {
@@ -118,20 +150,38 @@ export default class App extends Component<Props> {
   }
 
   componentWillMount () {
+    let tempArrayMarked = '';
+    let thisMonth =  moment(_today).format("M");
+    let tempArray = []; // need to declare here
+    DataArr.forEach(function(k, v, arr){
+          if(thisMonth==k.month){
+            tempArray.push({date:k.date,day:k.day,title:k.title});  
+          }       
+          tempArrayMarked += '"+k.date+"'+":{marked: true, dotColor: 'red', activeOpacity: 0}";  
+    });
+ 
     this.setState({
-      collectMarkedDate : { 
-              '2018-05-01': {selected: true, marked: true},
-              '2018-05-07': {marked: true},
-              '2018-05-19': {disabled: true,selected: true}
-            },
-        eventArr:[
-          { key:moment('2018-05-01').format(_formatView),title:'bun 1',description:'public holiday'},
-          { key:moment('2018-05-02').format(_formatView),title:'bun 2',description:'public holiday'},
-          { key:moment('2018-05-03').format(_formatView),title:'bun 2',description:'public holiday' },
-          ]
+    collectMarkedDate : { tempArrayMarked },
+      eventArr:tempArray,
     })
   }
   
+  onMonthSelect = (month) => {  
+  
+    let thisMonth =  moment(month.dateString).format('M');
+    let tempArray = []; // need to declare here
+    DataArr.forEach(function(k, v, arr){
+          if(thisMonth==k.month){
+            tempArray.push({date:k.date,day:k.day,title:k.title});  
+          }       
+    });
+ 
+    this.setState({    
+      eventArr:tempArray,
+    })
+  }
+
+
    componentDidMount() {
         SplashScreen.hide();
     }
@@ -142,7 +192,7 @@ export default class App extends Component<Props> {
       <StatusBar
         backgroundColor="blue"
         barStyle="light-content"
-      />
+      />    
       <Text style={styles.header}>
         ប្រតិទិនខ្មែរ
       </Text>  
@@ -160,7 +210,7 @@ export default class App extends Component<Props> {
             // Month format in calendar title. Formatting values: http://arshaw.com/xdate/#Formatting
             monthFormat={'yyyy MMM'}
             // Handler which gets executed when visible month changes in calendar. Default = undefined
-            onMonthChange={(month) => {console.log('month changed', month)}}
+            onMonthChange={this.onMonthSelect}
             nextButtonText={'ខែបន្ទាប់'}   
             prevButtonText={'ខែមុន'}   
             // Hide month navigation arrows. Default = false
@@ -201,12 +251,11 @@ export default class App extends Component<Props> {
          <FlatList
           data={this.state.eventArr}
           renderItem={({item}) => 
-               <View style={styles.item}>              
-                <Text style={styles.date}> {item.key} </Text>
-                <Text style={styles.title}> {item.title} </Text>             
-                <Text style={styles.key}> {item.description} </Text>
-               </View>}
-        />           
+               <Text style={styles.item}>              
+    <Text style={styles.date}>{item.day} </Text>
+                <Text style={styles.title}> {item.title} </Text>  
+               </Text >}
+         keyExtractor={(item, index) => index.toString()} />           
        </ScrollView> 
        <Modal
           animationType="slide"
@@ -262,7 +311,7 @@ const styles = StyleSheet.create({
         color:"#ffffff",
         padding: 10,
         fontWeight: 'bold',
-        fontSize:20,
+        fontSize:18,
         backgroundColor: '#0050D1'
     },
     container: {
@@ -289,7 +338,7 @@ const styles = StyleSheet.create({
     title:{    
       color:'blue', 
       fontFamily:'Khmer Os Battambang',
-      fontSize:16,
+      fontSize:14,
     },
     description:{
        flex: 1,
@@ -305,7 +354,7 @@ const styles = StyleSheet.create({
        fontFamily:'Khmer Os Battambang',
        fontWeight:'bold',
        color:'white',
-       fontSize:18,
+       fontSize:16,
     }
  
 });
