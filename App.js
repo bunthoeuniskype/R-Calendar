@@ -13,12 +13,42 @@ import {
   FlatList,
   StatusBar,
   ScrollView,
-  Modal
+  Modal,
+  Button,
+  TouchableHighlight
 } from 'react-native';
 import {LocaleConfig, Calendar, CalendarList, Agenda } from 'react-native-calendars';
 import moment from 'moment';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SplashScreen from 'react-native-splash-screen';
+
+
+
+class MyListItem extends React.Component {
+
+    constructor(props) {
+      super(props);
+      this.state = {      
+        eventArr:this.props.listArr
+      };        
+     
+    }
+ 
+  render() {  
+    return (   
+        <ScrollView>
+          <FlatList   
+            data={this.state.eventArr}
+            renderItem={({item}) => 
+                <Text style={styles.item}>              
+                <Text style={styles.date}>{item.day} </Text>
+                <Text style={styles.title}> {item.title} </Text>  
+                </Text >}
+            keyExtractor={(item, index) => index.toString()} />       
+        </ScrollView>
+    );
+  }
+}
 
 LocaleConfig.locales['kh'] = {
   monthNames: ['មករា','កុម្ភៈ','មីនា','មេសា','ឧសភា','មិថុនា','កក្កដា','សីហា','កញ្ញា','តុលា','វិច្ឆិកា','ធ្នូ'],
@@ -71,7 +101,6 @@ const _maxDate = moment().add(15, 'days').format(_format)
 const _formatView = 'DD'
 type Props = {};
 
-
 const DataArr = [
 {"date":"2018-01-01","month":"1","day": "1 មករា", "title": "ចូលឆ្នាំសកល"},
 {"date":"2018-01-07","month":"1","day": "7 មករា", "title": "ទិវាជ័យជំនះ៧មករា"},
@@ -102,6 +131,39 @@ const DataArr = [
 {"date":"2018-12-10","month":"12","day": "10 ធ្នូ", "title": "ទិវាសិទិ្ធមនុស្សអន្តរជាតិ"}
 ];
 
+const DataObj = {
+ "2018-01-01":{selected:true,marked: true},
+"2018-01-07":{selected:true,marked: true},
+"2018-01-31":{selected:true,marked: true},
+"2018-03-08":{selected:true,marked: true},
+"2018-04-14":{selected:true,marked: true},
+"2018-04-15":{selected:true,marked: true},
+"2018-04-16":{selected:true,marked: true},
+"2018-04-29":{selected:true,marked: true},
+"2018-05-01":{selected:true,marked: true},
+"2018-05-03":{selected:true,marked: true},
+"2018-05-13":{selected:true,marked: true},
+"2018-05-14":{selected:true,marked: true},
+"2018-05-15":{selected:true,marked: true},
+"2018-06-01":{selected:true,marked: true},
+"2018-06-18":{selected:true,marked: true},
+"2018-09-24":{selected:true,marked: true},
+"2018-10-08":{selected:true,marked: true},
+"2018-10-09":{selected:true,marked: true},
+"2018-10-10":{selected:true,marked: true},
+"2018-10-15":{selected:true,marked: true},
+"2018-10-23":{selected:true,marked: true},
+"2018-10-29":{selected:true,marked: true},
+"2018-11-09":{selected:true,marked: true},
+"2018-11-21":{selected:true,marked: true},
+"2018-11-22":{selected:true,marked: true},
+"2018-11-23":{selected:true,marked: true},
+"2018-12-10":{selected:true,marked: true},
+};
+
+
+const ArrEvent = [];
+//const  eventArr=[];
 export default class App extends Component<Props> {
 
   initialState = {
@@ -114,8 +176,10 @@ export default class App extends Component<Props> {
        _markedDates: this.initialState,
        collectMarkedDate: {},
        modalVisible: false,
-       _infoDate:{date:'',event:'',description:''},
-       eventArr:[],
+       _infoDate:{date:'',event:'',description:''},  
+       eventArr:[],  
+       ArrEvent:[],
+       status:false
     };   
   }
 
@@ -128,17 +192,13 @@ export default class App extends Component<Props> {
       const _selectedDay = moment(day.dateString).format(_format);
       
       let marked = true;
-      let markedDates = { 
-             '2018-05-01': {selected: true, marked: true},
-             '2018-05-07': {marked: true},
-             '2018-05-19': {disabled: true}
-            }
+      let markedDates = DataObj;
       if (this.state._markedDates[_selectedDay]) {
         // Already in marked dates, so reverse current marked state
         marked = !this.state._markedDates[_selectedDay].marked;
         markedDates = this.state._markedDates[_selectedDay];
       }
-      
+
       markedDates = {...markedDates, ...{ marked }};
       
       // Create a new object using object property spread since it should be immutable
@@ -146,46 +206,53 @@ export default class App extends Component<Props> {
       const updatedMarkedDates = {...this.state._markedDates, ...{ [_selectedDay]: markedDates } }
       
       // Triggers component to render again, picking up the new state
-      this.setState({ _markedDates: updatedMarkedDates });
+     
+
+
+    let thisMonth =  moment(day.dateString).format('M');
+   
+    let tempArray = []; // need to declare here
+    DataArr.forEach(function(k, v, arr){
+          if(thisMonth==k.month){
+            tempArray.push({date:k.date,day:k.day,title:k.title});  
+          }       
+    });
+  
+   this.setState({ _markedDates: updatedMarkedDates, ArrEvent:tempArray });  
   }
 
   componentWillMount () {
-    let tempArrayMarked = '';
+
     let thisMonth =  moment(_today).format("M");
     let tempArray = []; // need to declare here
     DataArr.forEach(function(k, v, arr){
           if(thisMonth==k.month){
             tempArray.push({date:k.date,day:k.day,title:k.title});  
-          }       
-          tempArrayMarked += '"+k.date+"'+":{marked: true, dotColor: 'red', activeOpacity: 0}";  
+          }               
     });
- 
+  
     this.setState({
-    collectMarkedDate : { tempArrayMarked },
-      eventArr:tempArray,
+       collectMarkedDate : DataObj    
     })
-  }
-  
-  onMonthSelect = (month) => {  
-  
-    let thisMonth =  moment(month.dateString).format('M');
-    let tempArray = []; // need to declare here
-    DataArr.forEach(function(k, v, arr){
-          if(thisMonth==k.month){
-            tempArray.push({date:k.date,day:k.day,title:k.title});  
-          }       
-    });
- 
-    this.setState({    
-      eventArr:tempArray,
-    })
-  }
 
+    this.setState({
+      eventArr:tempArray
+    })
+   this.state.ArrEvent=tempArray
+  }
+  
+  onMonthSelect(month){    
+  
+  } 
 
    componentDidMount() {
         SplashScreen.hide();
     }
   
+   shouldComponentUpdate() {        
+      return true;
+    }
+
   render() {
     return (      
       <View>  
@@ -210,7 +277,7 @@ export default class App extends Component<Props> {
             // Month format in calendar title. Formatting values: http://arshaw.com/xdate/#Formatting
             monthFormat={'yyyy MMM'}
             // Handler which gets executed when visible month changes in calendar. Default = undefined
-            onMonthChange={this.onMonthSelect}
+            onMonthChange={(month) => { this.onMonthSelect(month) }}
             nextButtonText={'ខែបន្ទាប់'}   
             prevButtonText={'ខែមុន'}   
             // Hide month navigation arrows. Default = false
@@ -244,18 +311,7 @@ export default class App extends Component<Props> {
           //renderDay={<CustomDay />}         // Optionally render a custom day component
           customStyle={customStyle}  
           onDayPress={this.onDaySelect}
-          />     
-          <Text style={styles.info}>
-           ពត៍មានអំពីថ្ងៃនីមួយៗ
-          </Text>   
-         <FlatList
-          data={this.state.eventArr}
-          renderItem={({item}) => 
-               <Text style={styles.item}>              
-    <Text style={styles.date}>{item.day} </Text>
-                <Text style={styles.title}> {item.title} </Text>  
-               </Text >}
-         keyExtractor={(item, index) => index.toString()} />           
+          />             
        </ScrollView> 
        <Modal
           animationType="slide"
@@ -266,12 +322,21 @@ export default class App extends Component<Props> {
           }}>
           <View>
             <Text style={styles.info}>
-              ពត៍មានសម្រាប់ថ្ងៃ
-            </Text>   
+               ពត៍មានអំពីថ្ងៃនីមួយៗ
+            </Text>  
+             <TouchableHighlight 
+                style={styles.btnModel}
+                onPress={() => {
+                  this.setModalVisible(!this.state.modalVisible);
+                }}>
+                <Text>ត្រឡប់ក្រោយ</Text>
+            </TouchableHighlight>  
+            </View>           
             <View>
-              <Text>Hello World!</Text>            
+               <MyListItem  
+                  listArr={this.state.ArrEvent}
+                />         
             </View>
-          </View>
         </Modal>
       </View>
     );
@@ -279,7 +344,7 @@ export default class App extends Component<Props> {
 }
 
 const styles = StyleSheet.create({
-      circle: {
+     circle: {
         width: 50,
         height: 50,
         borderRadius: 50/2,
@@ -304,7 +369,7 @@ const styles = StyleSheet.create({
         fontSize:26,
         backgroundColor: '#0050D1'
     },
-    info:{
+    info:{     
       fontFamily:'Khmer Os Battambang',
         textAlign: 'left',
         borderColor: '#bbb',
@@ -329,6 +394,8 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   item: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     padding: 10,   
     borderBottomWidth:1,
     borderColor:'#E5E5EB',
@@ -355,6 +422,11 @@ const styles = StyleSheet.create({
        fontWeight:'bold',
        color:'white',
        fontSize:16,
+    },
+    btnModel:{       
+       backgroundColor:'#E51010',
+       padding:10,      
+       alignItems:'center',  
     }
  
 });
