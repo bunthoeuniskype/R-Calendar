@@ -15,14 +15,18 @@ import {
   ScrollView,
   Modal,
   Button,
+  Dimensions,
   TouchableHighlight  
 } from 'react-native';
 import {LocaleConfig, Calendar, CalendarList, Agenda } from 'react-native-calendars';
 import moment from 'moment';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SplashScreen from 'react-native-splash-screen';
-
+import {
+  StackNavigator,
+} from 'react-navigation';
 import { Header } from 'react-native-elements';
+import CalScreen from './src/CalScreen';
 
 class MyListItem extends React.Component {
 
@@ -99,7 +103,7 @@ const _format = 'YYYY-MM-DD'
 const _today = moment().format(_format)
 const _maxDate = moment().add(15, 'days').format(_format)
 const _formatView = 'DD'
-type Props = {};
+//type Props = {};
 
 const DataArr = [
 {"date":"2018-01-01","month":"1","day": "1 មករា", "title": "ចូលឆ្នាំសកល"},
@@ -163,10 +167,9 @@ const DataObj = {
 "2018-12-10":{dots: [vacation],selected:true,marked: true},
 };
 
-
 const ArrEvent = [];
 //const  eventArr=[];
-export default class App extends Component<Props> {
+class AppHome extends React.Component {
 
   initialState = {
       [_today]: {disabled: true}
@@ -260,7 +263,12 @@ export default class App extends Component<Props> {
       return true;
     }
 
+   componentWillUnmount(){
+      
+    }
+
   render() {
+    const { navigate } = this.props.navigation;
     return (      
       <View>  
       <StatusBar
@@ -271,7 +279,7 @@ export default class App extends Component<Props> {
         placement="left"
         leftComponent={{ icon: 'event',title: 'ថ្ងៃនេះ', color: '#fff',onPress:() => this.onToday() }}
         centerComponent={{ text: 'ប្រតិទិនខ្មែរ', style: { color: '#fff',fontSize:18 } }}
-        rightComponent={{ icon: 'book', color: '#fff' }}
+        rightComponent={{ icon: 'book', color: '#fff',onPress:() => navigate('CalAddNotification') }}
         outerContainerStyles={styles.header}
       />  
     
@@ -315,10 +323,10 @@ export default class App extends Component<Props> {
           theme={themeStyle}
           scrollEnabled={true}   
           showControls={true}               // False hides prev/next buttons. Default: False  ​​​​​​​​​​​​​​​​   
-          onSwipeNext={this.onSwipeNext}    // Callback for forward swipe event
-          onSwipePrev={this.onSwipePrev}    // Callback for back swipe event
-          onTouchNext={this.onTouchNext}    // Callback for next touch event
-          onTouchPrev={this.onTouchPrev}    // Callback for prev touch event
+          onSwipeNext={addMonth => addMonth()}   // Callback for forward swipe event
+          onSwipePrev={substractMonth => substractMonth()}    // Callback for back swipe event
+          onTouchNext={addMonth => addMonth()}   // Callback for next touch event
+          onTouchPrev={substractMonth => substractMonth()}      // Callback for prev touch event
           onTitlePress={this.onTitlePress}  // Callback on title press        
           customStyle={customStyle}  
           onDayPress={this.onDaySelect}
@@ -445,82 +453,17 @@ const styles = StyleSheet.create({
  
 });
 
+const MainApp = StackNavigator({
+  Home : {screen:AppHome,navigationOptions:{ header: null }},
+  CalAddNotification:{screen:CalScreen,navigationOptions:{ title: 'ប្រតិទិនខ្មែរ',color:'#ffffff',backgroundColor:'#0050D1',fontFamily:'Khmer Os Battambang' }}
+});
 
-
-class AddAgenda extends React.Component {
-
-    constructor(props) {
-      super(props);
-      this.state = {      
-       
-      };        
-     
-    }
- 
-  render() {  
-    return (   
-        <ScrollView>
-          <Agenda
-              // the list of items that have to be displayed in agenda. If you want to render item as empty date
-              // the value of date key kas to be an empty array []. If there exists no value for date key it is
-              // considered that the date in question is not yet loaded
-              items={
-                {'2012-05-22': [{text: 'item 1 - any js object'}],
-                '2012-05-23': [{text: 'item 2 - any js object'}],
-                '2012-05-24': [],
-                '2012-05-25': [{text: 'item 3 - any js object'},{text: 'any js object'}],
-                }}
-              // callback that gets called when items for a certain month should be loaded (month became visible)
-              loadItemsForMonth={(month) => {console.log('trigger items loading')}}
-              // callback that fires when the calendar is opened or closed
-              onCalendarToggled={(calendarOpened) => {console.log(calendarOpened)}}
-              // callback that gets called on day press
-              onDayPress={(day)=>{console.log('day pressed')}}
-              // callback that gets called when day changes while scrolling agenda list
-              onDayChange={(day)=>{console.log('day changed')}}
-              // initially selected day
-              selected={'2012-05-16'}
-              // Minimum date that can be selected, dates before minDate will be grayed out. Default = undefined
-              minDate={'2012-05-10'}
-              // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
-              maxDate={'2012-05-30'}
-              // Max amount of months allowed to scroll to the past. Default = 50
-              pastScrollRange={50}
-              // Max amount of months allowed to scroll to the future. Default = 50
-              futureScrollRange={50}
-              // specify how each item should be rendered in agenda
-              renderItem={(item, firstItemInDay) => {return (<View />);}}
-              // specify how each date should be rendered. day can be undefined if the item is not first in that day.
-              renderDay={(day, item) => {return (<View />);}}
-              // specify how empty date content with no items should be rendered
-              renderEmptyDate={() => {return (<View />);}}
-              // specify how agenda knob should look like
-              renderKnob={() => {return (<View />);}}
-              // specify what should be rendered instead of ActivityIndicator
-              renderEmptyData = {() => {return (<View />);}}
-              // specify your item comparison function for increased performance
-              rowHasChanged={(r1, r2) => {return r1.text !== r2.text}}
-              // Hide knob button. Default = false
-              hideKnob={true}
-              // By default, agenda dates are marked if they have at least one item, but you can override this if needed
-              markedDates={{
-                '2012-05-16': {selected: true, marked: true},
-                '2012-05-17': {marked: true},
-                '2012-05-18': {disabled: true}
-              }}
-              // agenda theme
-              theme={{
-                ...calendarTheme,
-                agendaDayTextColor: 'yellow',
-                agendaDayNumColor: 'green',
-                agendaTodayColor: 'red',
-                agendaKnobColor: 'blue'
-              }}
-              // agenda container style
-              style={{}}
-            />
-        </ScrollView>
+export default class App extends React.Component {
+  render() {
+    return (
+      <View style={styles.container}>
+        <MainApp style={{ width: Dimensions.get("window").width }} />
+      </View>
     );
   }
 }
-
