@@ -15,14 +15,14 @@ import {
   ScrollView,
   Modal,
   Button,
-  TouchableHighlight
+  TouchableHighlight  
 } from 'react-native';
 import {LocaleConfig, Calendar, CalendarList, Agenda } from 'react-native-calendars';
 import moment from 'moment';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SplashScreen from 'react-native-splash-screen';
 
-
+import { Header } from 'react-native-elements';
 
 class MyListItem extends React.Component {
 
@@ -90,7 +90,7 @@ const themeStyle = {
             textMonthFontFamily: 'Khmer OS Battambang',
             textDayHeaderFontFamily: 'Khmer OS Battambang',
             textMonthFontWeight: 'bold',
-            textDayFontSize: 24,
+            textDayFontSize: 14,
             textMonthFontSize: 20,
             textDayHeaderFontSize: 14
 }
@@ -131,34 +131,36 @@ const DataArr = [
 {"date":"2018-12-10","month":"12","day": "10 ធ្នូ", "title": "ទិវាសិទិ្ធមនុស្សអន្តរជាតិ"}
 ];
 
+
+const vacation = {key:'vacation', color: 'gray', selectedDotColor: 'blue'};
 const DataObj = {
- "2018-01-01":{selected:true,marked: true},
-"2018-01-07":{selected:true,marked: true},
-"2018-01-31":{selected:true,marked: true},
-"2018-03-08":{selected:true,marked: true},
-"2018-04-14":{selected:true,marked: true},
-"2018-04-15":{selected:true,marked: true},
-"2018-04-16":{selected:true,marked: true},
-"2018-04-29":{selected:true,marked: true},
-"2018-05-01":{selected:true,marked: true},
-"2018-05-03":{selected:true,marked: true},
-"2018-05-13":{selected:true,marked: true},
-"2018-05-14":{selected:true,marked: true},
-"2018-05-15":{selected:true,marked: true},
-"2018-06-01":{selected:true,marked: true},
-"2018-06-18":{selected:true,marked: true},
-"2018-09-24":{selected:true,marked: true},
-"2018-10-08":{selected:true,marked: true},
-"2018-10-09":{selected:true,marked: true},
-"2018-10-10":{selected:true,marked: true},
-"2018-10-15":{selected:true,marked: true},
-"2018-10-23":{selected:true,marked: true},
-"2018-10-29":{selected:true,marked: true},
-"2018-11-09":{selected:true,marked: true},
-"2018-11-21":{selected:true,marked: true},
-"2018-11-22":{selected:true,marked: true},
-"2018-11-23":{selected:true,marked: true},
-"2018-12-10":{selected:true,marked: true},
+"2018-01-01":{dots: [vacation],selected:true,marked: true},
+"2018-01-07":{dots: [vacation],selected:true,marked: true},
+"2018-01-31":{dots: [vacation],selected:true,marked: true},
+"2018-03-08":{dots: [vacation],selected:true,marked: true},
+"2018-04-14":{dots: [vacation],selected:true,marked: true},
+"2018-04-15":{dots: [vacation],selected:true,marked: true},
+"2018-04-16":{dots: [vacation],selected:true,marked: true},
+"2018-04-29":{dots: [vacation],selected:true,marked: true},
+"2018-05-01":{dots: [vacation],selected:true,marked: true},
+"2018-05-03":{dots: [vacation],selected:true,marked: true},
+"2018-05-13":{dots: [vacation],selected:true,marked: true},
+"2018-05-14":{dots: [vacation],selected:true,marked: true},
+"2018-05-15":{dots: [vacation],selected:true,marked: true},
+"2018-06-01":{dots: [vacation],selected:true,marked: true},
+"2018-06-18":{dots: [vacation],selected:true,marked: true},
+"2018-09-24":{dots: [vacation],selected:true,marked: true},
+"2018-10-08":{dots: [vacation],selected:true,marked: true},
+"2018-10-09":{dots: [vacation],selected:true,marked: true},
+"2018-10-10":{dots: [vacation],selected:true,marked: true},
+"2018-10-15":{dots: [vacation],selected:true,marked: true},
+"2018-10-23":{dots: [vacation],selected:true,marked: true},
+"2018-10-29":{dots: [vacation],selected:true,marked: true},
+"2018-11-09":{dots: [vacation],selected:true,marked: true},
+"2018-11-21":{dots: [vacation],selected:true,marked: true},
+"2018-11-22":{dots: [vacation],selected:true,marked: true},
+"2018-11-23":{dots: [vacation],selected:true,marked: true},
+"2018-12-10":{dots: [vacation],selected:true,marked: true},
 };
 
 
@@ -179,7 +181,8 @@ export default class App extends Component<Props> {
        _infoDate:{date:'',event:'',description:''},  
        eventArr:[],  
        ArrEvent:[],
-       status:false
+       status:false,
+       _today:_today
     };   
   }
 
@@ -207,8 +210,6 @@ export default class App extends Component<Props> {
       
       // Triggers component to render again, picking up the new state
      
-
-
     let thisMonth =  moment(day.dateString).format('M');
    
     let tempArray = []; // need to declare here
@@ -245,6 +246,12 @@ export default class App extends Component<Props> {
   
   } 
 
+    onToday(){    
+      this.setState({
+        _today:_today
+      })
+    } 
+
    componentDidMount() {
         SplashScreen.hide();
     }
@@ -259,14 +266,19 @@ export default class App extends Component<Props> {
       <StatusBar
         backgroundColor="blue"
         barStyle="light-content"
-      />    
-      <Text style={styles.header}>
-        ប្រតិទិនខ្មែរ
-      </Text>  
+      /> 
+      <Header      
+        placement="left"
+        leftComponent={{ icon: 'event',title: 'ថ្ងៃនេះ', color: '#fff',onPress:() => this.onToday() }}
+        centerComponent={{ text: 'ប្រតិទិនខ្មែរ', style: { color: '#fff',fontSize:18 } }}
+        rightComponent={{ icon: 'book', color: '#fff' }}
+        outerContainerStyles={styles.header}
+      />  
+    
       <ScrollView>
       <Calendar
             showEventIndicators={true}            
-            current={_today}
+            current={this.state._today}
             markedDates={this.state.collectMarkedDate}         
             // Minimum date that can be selected, dates before minDate will be grayed out. Default = undefined
             minDate={'2018-01-01'}
@@ -307,10 +319,10 @@ export default class App extends Component<Props> {
           onSwipePrev={this.onSwipePrev}    // Callback for back swipe event
           onTouchNext={this.onTouchNext}    // Callback for next touch event
           onTouchPrev={this.onTouchPrev}    // Callback for prev touch event
-          onTitlePress={this.onTitlePress}  // Callback on title press
-          //renderDay={<CustomDay />}         // Optionally render a custom day component
+          onTitlePress={this.onTitlePress}  // Callback on title press        
           customStyle={customStyle}  
           onDayPress={this.onDaySelect}
+          markingType={'multi-dot'}
           />             
        </ScrollView> 
        <Modal
@@ -323,19 +335,19 @@ export default class App extends Component<Props> {
           <View>
             <Text style={styles.info}>
                ពត៍មានអំពីថ្ងៃនីមួយៗ
-            </Text>  
+            </Text>               
+            </View>           
+            <View>
+               <MyListItem  
+                  listArr={this.state.ArrEvent}
+                />     
              <TouchableHighlight 
                 style={styles.btnModel}
                 onPress={() => {
                   this.setModalVisible(!this.state.modalVisible);
                 }}>
                 <Text>ត្រឡប់ក្រោយ</Text>
-            </TouchableHighlight>  
-            </View>           
-            <View>
-               <MyListItem  
-                  listArr={this.state.ArrEvent}
-                />         
+              </TouchableHighlight>        
             </View>
         </Modal>
       </View>
@@ -359,14 +371,16 @@ const styles = StyleSheet.create({
         width:'100%',
         paddingBottom:10,
     },
-    header: {
-        fontFamily:'Khmer Os Battambang',
-        textAlign: 'center',
-        borderColor: '#bbb',
-        color:"#ffffff",
-        padding: 10,
-        fontWeight: 'bold',
-        fontSize:26,
+    headertitle:{
+      fontFamily:'Khmer Os Battambang',
+      textAlign: 'center',
+      borderColor: '#bbb',
+      color:"#ffffff",
+      padding: 10,
+      fontWeight: 'bold',
+      fontSize:26,
+    },
+    header: {    
         backgroundColor: '#0050D1'
     },
     info:{     
@@ -430,3 +444,83 @@ const styles = StyleSheet.create({
     }
  
 });
+
+
+
+class AddAgenda extends React.Component {
+
+    constructor(props) {
+      super(props);
+      this.state = {      
+       
+      };        
+     
+    }
+ 
+  render() {  
+    return (   
+        <ScrollView>
+          <Agenda
+              // the list of items that have to be displayed in agenda. If you want to render item as empty date
+              // the value of date key kas to be an empty array []. If there exists no value for date key it is
+              // considered that the date in question is not yet loaded
+              items={
+                {'2012-05-22': [{text: 'item 1 - any js object'}],
+                '2012-05-23': [{text: 'item 2 - any js object'}],
+                '2012-05-24': [],
+                '2012-05-25': [{text: 'item 3 - any js object'},{text: 'any js object'}],
+                }}
+              // callback that gets called when items for a certain month should be loaded (month became visible)
+              loadItemsForMonth={(month) => {console.log('trigger items loading')}}
+              // callback that fires when the calendar is opened or closed
+              onCalendarToggled={(calendarOpened) => {console.log(calendarOpened)}}
+              // callback that gets called on day press
+              onDayPress={(day)=>{console.log('day pressed')}}
+              // callback that gets called when day changes while scrolling agenda list
+              onDayChange={(day)=>{console.log('day changed')}}
+              // initially selected day
+              selected={'2012-05-16'}
+              // Minimum date that can be selected, dates before minDate will be grayed out. Default = undefined
+              minDate={'2012-05-10'}
+              // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
+              maxDate={'2012-05-30'}
+              // Max amount of months allowed to scroll to the past. Default = 50
+              pastScrollRange={50}
+              // Max amount of months allowed to scroll to the future. Default = 50
+              futureScrollRange={50}
+              // specify how each item should be rendered in agenda
+              renderItem={(item, firstItemInDay) => {return (<View />);}}
+              // specify how each date should be rendered. day can be undefined if the item is not first in that day.
+              renderDay={(day, item) => {return (<View />);}}
+              // specify how empty date content with no items should be rendered
+              renderEmptyDate={() => {return (<View />);}}
+              // specify how agenda knob should look like
+              renderKnob={() => {return (<View />);}}
+              // specify what should be rendered instead of ActivityIndicator
+              renderEmptyData = {() => {return (<View />);}}
+              // specify your item comparison function for increased performance
+              rowHasChanged={(r1, r2) => {return r1.text !== r2.text}}
+              // Hide knob button. Default = false
+              hideKnob={true}
+              // By default, agenda dates are marked if they have at least one item, but you can override this if needed
+              markedDates={{
+                '2012-05-16': {selected: true, marked: true},
+                '2012-05-17': {marked: true},
+                '2012-05-18': {disabled: true}
+              }}
+              // agenda theme
+              theme={{
+                ...calendarTheme,
+                agendaDayTextColor: 'yellow',
+                agendaDayNumColor: 'green',
+                agendaTodayColor: 'red',
+                agendaKnobColor: 'blue'
+              }}
+              // agenda container style
+              style={{}}
+            />
+        </ScrollView>
+    );
+  }
+}
+
