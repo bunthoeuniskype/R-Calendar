@@ -1,7 +1,6 @@
 package com.appcalendar;
 
 import com.facebook.react.ReactActivity;
-
 import android.os.Bundle; // here
 import org.devio.rn.splashscreen.SplashScreen; // here
 

@@ -1,4 +1,6 @@
 rootProject.name = 'AppCalendar'
+include ':react-native-add-calendar-event'
+project(':react-native-add-calendar-event').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-add-calendar-event/android')
 include ':@remobile/react-native-splashscreen'
 project(':@remobile/react-native-splashscreen').projectDir = new File(rootProject.projectDir, '../node_modules/@remobile/react-native-splashscreen/android')
 include ':react-native-vector-icons'

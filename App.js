@@ -27,6 +27,7 @@ import {
 } from 'react-navigation';
 import { Header } from 'react-native-elements';
 import CalScreen from './src/CalScreen';
+import AddEvent from './src/AddEvent';
 
 class MyListItem extends React.Component {
 
@@ -455,7 +456,8 @@ const styles = StyleSheet.create({
 
 const MainApp = StackNavigator({
   Home : {screen:AppHome,navigationOptions:{ header: null }},
-  CalAddNotification:{screen:CalScreen,navigationOptions:{ title: 'ប្រតិទិនខ្មែរ',color:'#ffffff',backgroundColor:'#0050D1',fontFamily:'Khmer Os Battambang' }}
+  CalAddNotification:{screen:CalScreen,navigationOptions:{ title: 'ប្រតិទិនខ្មែរ',color:'#ffffff',backgroundColor:'#0050D1',fontFamily:'Khmer Os Battambang' }},
+  AddEvent:{screen:AddEvent,navigationOptions:{ title: 'ប្រតិការណ៏',color:'#ffffff',backgroundColor:'#0050D1',fontFamily:'Khmer Os Battambang' }}
 });
 
 export default class App extends React.Component {
