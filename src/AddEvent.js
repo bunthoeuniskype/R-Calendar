@@ -3,102 +3,164 @@ import {
   ScrollView,
   View,
   Text,
-  Button,
-  StyleSheet,
-  TextInput,
+  StyleSheet
 } from 'react-native';
-import {
-  StackNavigator,
-} from 'react-navigation';
 import moment from 'moment';
-import { Form,
-  Separator,InputField, LinkField,
-  SwitchField, PickerField,DatePickerField,TimePickerField
-} from 'react-native-form-generator';
+import { Button,FormLabel, FormInput, FormValidationMessage } from 'react-native-elements';
+import DateTimePicker from 'react-native-modal-datetime-picker';
+import SQLite from 'react-native-sqlite-2';
 
+const database_name = 'AppCalendar.db'
+const database_version = '1.0'
+const database_displayname = 'SQLite Test Database'
+const database_size = 200000;
+let db;
 
+const styles = {
+  wrapper: {
+    flex: 1,
+    marginTop: 150,
+  },
+  submitButton: {   
+    backgroundColor:'#2089dc',
+    marginTop:15,
+    marginLeft:15,
+    marginRight:15,
+    padding: 5,
+    fontSize: 20,
+    textAlign: 'center',
+  },
+  container:{
+    backgroundColor:'white',
+    minHeight:500
+  },labelShow:{
+    fontSize:18,
+  }
+};
+const _formatTime = 'H:m';
+const _formatDate = 'DD MMMM YYYY';
 
 export default class AddEvent extends React.Component {
 
     constructor(props) {
       super(props);
-      this.state = {      
-         formData:''
-      };       
-    }
-
-    handleFormChange(formData){
-    /*
-    formData will contain all the values of the form,
-    in this example.
-
-    formData = {
-        first_name:"",
-        last_name:"",
-        gender: '',
-        birthday: Date,
-        has_accepted_conditions: bool
-        }
-        */
-
-        this.setState({formData:formData})
-        this.props.onFormChange && this.props.onFormChange(formData);
-      }
-      handleFormFocus(e, component){
-        //console.log(e, component);
-      }
-      openTermsAndConditionsURL(){
-
-      }
+      this.state = { 
+        date:moment().format(_formatDate),time:moment().format(_formatTime),description:null,
+        isDatePickerVisible: false,isTimePickerVisible:false
+       };
+       this.onDescription = this.onDescription.bind(this);
+    }    
     
-    componentWillMount() {
-      
-    }
-    componentWWillunMount(){
+  onDescription(description){
+    this.setState({
+        description
+    })    
+  }
 
-    }
-    
-    shouldComponentUpdate() {        
+   _showDatePicker = () => this.setState({ isDatePickerVisible: true });
+
+  _hideDatePicker = () => this.setState({ isDatePickerVisible: false });
+
+  _handleDatePicked = (d) => {  
+    newDate =  moment(d.dateString).format(_formatDate);
+    this.setState({
+      date:newDate
+    }) 
+    this._hideDatePicker();
+  };
+
+   _showTimePicker = () => this.setState({ isTimePickerVisible: true });
+
+   _hideTimePicker = () => this.setState({ isTimePickerVisible: false });
+
+   _handleTimePicked = (t) => { 
+     newTime =  moment(t.dateString).format(_formatTime);
+    this.setState({
+      time:newTime
+    })  
+    this._hideTimePicker();
+  };
+   
+  openCB = () => {
+    //open connect
+  }
+
+  errorCB = () => {
+   //error connect
+  }
+
+  save = () =>{
+    db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size, this.openCB, this.errorCB) 
+    db.transaction((txn) => {
+      txn.executeSql('SELECT 1 FROM Version LIMIT 1',[], () => {  db.transaction(this.saveEvent, this.errorCB, () => { })},
+        (error) => { }
+      )
+    })   
+  } 
+
+  saveEvent = (txn) => {
+      date = this.state.date;  
+      time = this.state.time;
+      description = this.state.description; 
+     txn.executeSql('INSERT INTO AppEvent (title,time,description) VALUES(:title,:time,:description)', [date,time,description], alert('Add Success'), this.errorCB);
+  }
+
+  shouldComponentUpdate() {        
       return true;
-    }
-     
+  }
+  componentWillUnmount () {
+      this.closeDatabase();
+      this.setState = { 
+        date:null,time:null,description:null
+    };
+  }
+
+  closeDatabase () {
+   
+  }
+
   render() {     
     return (     
-      <ScrollView>   
-       <Form
-          ref='registrationForm'
-          onFocus={this.handleFormFocus.bind(this)}
-          onChange={this.handleFormChange.bind(this)} >
-              
-          <InputField ref='last_name' placeholder='Last Name'/>
-          <InputField
-            multiline={true}
-            ref='other_input'
-            placeholder='Other Input'
-            helpText='this is an helpful text it can be also very very long and it will wrap' />
-          <Separator />
-          <LinkField label="test test test" onPress={()=>{}}/>
-          <SwitchField label='I accept Terms & Conditions'
-            ref="has_accepted_conditions"
-            helpText='Please read carefully the terms & conditions'/>
-          <PickerField ref='gender'
-            label='Gender'
-            options={{
-              "": '',
-              male: 'Male',
-              female: 'Female'
-            }}/>
-            <DatePickerField ref='birthday'
-            minimumDate={new Date('1/1/1900')}
-            maximumDate={new Date()}
-            placeholder='Birthday'/>
-          <TimePickerField ref='alarm_time'
-        placeholder='Set Alarm'/>
-          <DatePickerField ref='meeting'
-            minimumDate={new Date('1/1/1900')}
-            maximumDate={new Date()} mode="datetime" placeholder='Meeting'/>
-          </Form>
-        
+      <ScrollView>
+        <View style={styles.container}> 
+        <FormLabel>កាលបរិច្ឆេទ : <Text style={styles.labelShow}> {this.state.date} </Text></FormLabel>
+        <Button    
+          raised
+          style={styles.submitButton}
+          onPress={ this._showDatePicker }
+          title="ជ្រើសរើស​ កាលបរិច្ឆេទ"
+        />
+       
+        <DateTimePicker
+          mode='date'
+          isVisible={this.state.isDatePickerVisible}
+          onConfirm={this._handleDatePicked}
+          onCancel={this._hideDatePicker}
+        />
+
+         <FormLabel>ពេលវេលា​​ : <Text style={styles.labelShow}> {this.state.time}</Text></FormLabel>
+         <Button    
+          raised 
+          style={styles.submitButton}
+          onPress={ this._showTimePicker }
+          title="ជ្រើសរើស​ ពេលវេលា"
+        />
+
+         <DateTimePicker
+          mode='time'
+          isVisible={this.state.isTimePickerVisible}
+          onConfirm={this._handleTimePicked}
+          onCancel={this._hideTimePicker}
+        />
+        <FormLabel>ចំនាំ</FormLabel>
+        <FormInput name="description" onChangeText={this.onDescription} placeholder="ចំនាំ" value={this.state.description}/>
+         <Button    
+          backgroundColor="#2089dc"         
+          style={styles.submitButton}
+          onPress={ this.save }
+          title="រក្សាទុក"
+        />
+        </View>        
       </ScrollView>
     );
   }

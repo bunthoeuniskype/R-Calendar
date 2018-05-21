@@ -1,9 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
 import React, { Component } from 'react';
 import {
   Platform,
@@ -24,6 +18,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import SplashScreen from 'react-native-splash-screen';
 import {
   StackNavigator,
+  CreateStackNavigator
 } from 'react-navigation';
 import { Header } from 'react-native-elements';
 import CalScreen from './src/CalScreen';
@@ -455,10 +450,14 @@ const styles = StyleSheet.create({
 });
 
 const MainApp = StackNavigator({
-  Home : {screen:AppHome,navigationOptions:{ header: null }},
-  CalAddNotification:{screen:CalScreen,navigationOptions:{ title: 'ប្រតិទិនខ្មែរ',color:'#ffffff',backgroundColor:'#0050D1',fontFamily:'Khmer Os Battambang' }},
+  Home:{screen:AppHome,navigationOptions:{ header: null }},
+  CalAddNotification:{screen:CalScreen,navigationOptions:{ title: 'ប្រតិទិនខ្មែរ',color:'#ffffff',backgroundColor:'#0050D1',fontFamily:'Khmer Os Battambang' }},  
   AddEvent:{screen:AddEvent,navigationOptions:{ title: 'ប្រតិការណ៏',color:'#ffffff',backgroundColor:'#0050D1',fontFamily:'Khmer Os Battambang' }}
+},{
+  initialRouteName : 'Home'
 });
+
+ 
 
 export default class App extends React.Component {
   render() {
@@ -469,3 +468,4 @@ export default class App extends React.Component {
     );
   }
 }
+

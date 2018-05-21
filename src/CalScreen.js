@@ -4,31 +4,22 @@ import {
   ScrollView,
   View,
   Text,
-  Button,
   StyleSheet,
   TextInput,
+  ListView
 } from 'react-native';
-import {
-  StackNavigator,
-} from 'react-navigation';
 import moment from 'moment';
 import Timeline from 'react-native-timeline-listview';
+import SQLite from 'react-native-sqlite-2';
+import { Button } from 'react-native-elements';
 
 let momentInUTC = moment;
 
-const utcDateToString = (momentInUTC) => {
-  let s = moment.utc(momentInUTC).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-  // console.warn(s);
-  return s;
-};
-
-const dataArr = [
-      {time: '09:00', title: 'Event 1', description: 'Event 1 Description'},
-      {time: '10:45', title: 'Event 2', description: 'Event 2 Description'},
-      {time: '12:00', title: 'Event 3', description: 'Event 3 Description'},
-      {time: '14:00', title: 'Event 4', description: 'Event 4 Description'},
-      {time: '16:30', title: 'Event 5', description: 'Event 5 Description'}
-    ];
+const database_name = 'AppCalendar.db'
+const database_version = '1.0'
+const database_displayname = 'SQLite Test Database'
+const database_size = 200000;
+let db;
 
 export default class CalScreen extends React.Component {
 
@@ -36,82 +27,119 @@ export default class CalScreen extends React.Component {
       super(props);
       this.state = {      
        text: '',
-       data:dataArr
+        data:[],
+        progress: []       
       };       
     }
     
     componentWillMount() {
-      
+      this.loadAndQueryDB() ;
     }
-    componentWWillunMount(){
-
-    }
-    
+  
     shouldComponentUpdate() {        
       return true;
     }
      
+    componentWillUnmount () {
+      this.closeDatabase();
+      this.setState({
+              data:[]
+        })
+    }
+
+  errorCB = (err) => {
+    console.log('error: ', err)
+    this.state.progress.push('Error: ' + (err.message || err))
+    this.setState(this.state)
+    return false
+  }
+
+  successCB = () => {
+    console.log('SQL executed ...')
+  }
+
+  openCB = () => {
+    this.state.progress.push('Database OPEN')
+    this.setState(this.state)
+  }
+
+  closeCB = () => {
+    this.state.progress.push('Database CLOSED')
+    this.setState(this.state)
+  }
+
+  deleteCB = () => {
+    console.log('Database DELETED')
+    this.state.progress.push('Database DELETED')
+    this.setState(this.state)
+  }
+
+  getEventCollection (db) {   
+    db.transaction((txn) => {
+      txn.executeSql(  'SELECT 1 FROM Version LIMIT 1',
+        [],
+        () => {  db.transaction(this.queryEvent, this.errorCB, () => { }) },
+        (error) => { }
+      )
+    })
+  }
+
+  queryEvent = (tx) => {   
+    tx.executeSql('SELECT title, time, description FROM AppEvent order by id DESC',[],
+      this.queryEventSuccess, this.errorCB)
+  }
+
+  queryEventSuccess = (tx, results) => {
+     this.state.progress.push('events data..')
+      this.setState(this.state)
+      var len = results.rows.length
+      for (let i = 0; i < len; i++) {
+        let row = results.rows.item(i)   
+        this.state.data.push({time: row.time, title: row.title, description:row.description})
+      }
+      this.setState(this.state)
+  }
+
+  loadAndQueryDB () {   
+    db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size, this.openCB, this.errorCB)
+    db.transaction(function (txn) {        
+        txn.executeSql('CREATE TABLE IF NOT EXISTS AppEvent(id INTEGER PRIMARY KEY NOT NULL,title VARCHAR(50), time VARCHAR(30),description VARCHAR(500))', []);
+     });
+    this.getEventCollection(db);
+  }
+
+  closeDatabase () {
+    var that = this
+    if (db) {
+      console.log('Closing database ...')
+      that.state.progress.push('Closing database')
+      that.setState(that.state)
+    } else {
+      that.state.progress.push('Database was not OPENED')
+      that.setState(that.state)
+    }
+  }
+
   render() {  
     const { navigate } = this.props.navigation;
     const eventTitle = 'Lunch';
     const nowUTC = moment.utc();
-    return (     
-      <ScrollView>   
-        <Button     
-          onPress={ () => navigate('AddEvent') }
-          title="បញ្ចួលប្រតិការណ៏ថ្មី"
-        />
-        
-        <Timeline
-          data={this.state.data}
-        />
-            
+  
+    return ( 
+        <View>       
+        <Button    
+            backgroundColor="#2089dc"       
+            onPress={ () => navigate('AddEvent') }
+            title="បញ្ចួលប្រតិការណ៏ថ្មី"
+          /> 
+        <ScrollView>          
+          <Timeline
+            data={this.state.data}
+          />
         </ScrollView>
+      </View>   
     );
   }
-
-  static addToCalendar = (title, startDateUTC) => {
-    const eventConfig = {
-      title,
-      startDate: utcDateToString(startDateUTC),
-      endDate: utcDateToString(moment.utc(startDateUTC).add(1, 'hours')),
-    };
-
-    AddCalendarEvent.presentEventDialog(eventConfig)
-      .then((eventInfo) => {
-        //{ calendarItemIdentifier, eventIdentifier}
-        // handle success - receives an object with `calendarItemIdentifier` and `eventIdentifier` keys, both of type string.
-        // These are two different identifiers on iOS.
-        // On Android, where they are both equal and represent the event id, also strings.
-        // when false is returned, the dialog was dismissed
-        if (eventInfo) {
-          console.warn(JSON.stringify(eventInfo));
-        } else {
-          console.warn('dismissed');
-        }
-      })
-      .catch((error) => {
-        // handle error such as when user rejected permissions
-        console.warn(error);
-      });
-  };
-
-  static editCalendarEventWithId = (eventId) => {
-    const eventConfig = {
-      eventId,
-    };
-
-    AddCalendarEvent.presentEventDialog(eventConfig)
-      .then(eventId => {
-        // eventId is always returned when editing events
-        console.warn(eventId);
-      })
-      .catch((error) => {
-        // handle error such as when user rejected permissions
-        console.warn(error);
-      });
-  };
-
 }
 
 const styles = StyleSheet.create({
@@ -132,6 +160,62 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
 });
+
+var listStyles = StyleSheet.create({
+  li: {
+    borderBottomColor: '#c8c7cc',
+    borderBottomWidth: 0.5,
+    paddingTop: 15,
+    paddingRight: 15,
+    paddingBottom: 15
+  },
+  liContainer: {
+    backgroundColor: '#fff',
+    flex: 1,
+    paddingLeft: 15
+  },
+  liIndent: {
+    flex: 1
+  },
+  liText: {
+    color: '#333',
+    fontSize: 17,
+    fontWeight: '400',
+    marginBottom: -3.5,
+    marginTop: -3.5
+  },
+  container1: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5FCFF'
+  },
+  welcome: {
+    fontSize: 20,
+    textAlign: 'center',
+    margin: 10
+  },
+  instructions: {
+    textAlign: 'center',
+    color: '#333333',
+    marginBottom: 5
+  },
+  toolbar: {
+    backgroundColor: '#51c04d',
+    paddingTop: 30,
+    paddingBottom: 10,
+    flexDirection: 'row'
+  },
+  toolbarButton: {
+    color: 'white',
+    textAlign: 'center',
+    flex: 1
+  },
+  mainContainer: {
+    flex: 1
+  }
+})
+
 
 
 

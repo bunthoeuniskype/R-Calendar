@@ -3,6 +3,7 @@ package com.appcalendar;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import dog.craftz.sqlite_2.RNSqlite2Package;
 import com.vonovak.AddCalendarEventPackage;
 // import com.remobile.splashscreen.RCTSplashScreenPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
@@ -28,6 +29,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNSqlite2Package(),
             new AddCalendarEventPackage(),
             // new RCTSplashScreenPackage(),
             new VectorIconsPackage(),
