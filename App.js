@@ -350,7 +350,7 @@ class AppHome extends React.Component {
                 onPress={() => {
                   this.setModalVisible(!this.state.modalVisible);
                 }}>
-                <Text>ត្រឡប់ក្រោយ</Text>
+                <Text style={{color:'#ffffff'}}>ត្រឡប់ក្រោយ</Text>
               </TouchableHighlight>        
             </View>
         </Modal>
@@ -431,13 +431,10 @@ const styles = StyleSheet.create({
        fontSize:12,
     },
     date:{
-       padding:4,
-       backgroundColor:'red',
-       width: 35,
-       height: 35,
-       borderRadius: 35/2,
-       fontFamily:'Khmer Os Battambang',
-       fontWeight:'bold',
+       padding:6,
+       backgroundColor:'#ff9797',       
+       borderRadius: 12,
+       fontFamily:'Khmer Os Battambang',      
        color:'white',
        fontSize:16,
     },

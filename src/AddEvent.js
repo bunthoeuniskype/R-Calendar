@@ -9,6 +9,7 @@ import moment from 'moment';
 import { Button,FormLabel, FormInput, FormValidationMessage } from 'react-native-elements';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import SQLite from 'react-native-sqlite-2';
+// import CalScreen from './CalScreen';
 
 const database_name = 'AppCalendar.db'
 const database_version = '1.0'
@@ -57,12 +58,18 @@ export default class AddEvent extends React.Component {
     })    
   }
 
+  // componentWillMount(){
+  //    this.state = { 
+  //       date:moment().format(_formatDate),time:moment().format(_formatTime),description:null
+  //      };
+  // }
+
    _showDatePicker = () => this.setState({ isDatePickerVisible: true });
 
   _hideDatePicker = () => this.setState({ isDatePickerVisible: false });
 
   _handleDatePicked = (d) => {  
-    newDate =  moment(d.dateString).format(_formatDate);
+    newDate =  moment(d).format(_formatDate);
     this.setState({
       date:newDate
     }) 
@@ -74,7 +81,7 @@ export default class AddEvent extends React.Component {
    _hideTimePicker = () => this.setState({ isTimePickerVisible: false });
 
    _handleTimePicked = (t) => { 
-     newTime =  moment(t.dateString).format(_formatTime);
+     newTime =  moment(t).format(_formatTime);
     this.setState({
       time:newTime
     })  
@@ -102,12 +109,14 @@ export default class AddEvent extends React.Component {
       date = this.state.date;  
       time = this.state.time;
       description = this.state.description; 
-     txn.executeSql('INSERT INTO AppEvent (title,time,description) VALUES(:title,:time,:description)', [date,time,description], alert('Add Success'), this.errorCB);
+     txn.executeSql('INSERT INTO AppEvent (title,time,description) VALUES(:title,:time,:description)', [date,time,description],this.backFun, this.errorCB);
   }
 
-  shouldComponentUpdate() {        
-      return true;
+  backFun=()=>{
+   // CalScreen.loadAndQueryDB();
+     this.props.navigation.goBack()
   }
+
   componentWillUnmount () {
       this.closeDatabase();
       this.setState = { 
@@ -117,6 +126,10 @@ export default class AddEvent extends React.Component {
 
   closeDatabase () {
    
+  }
+
+  shouldComponentUpdate() {        
+      return true;
   }
 
   render() {     

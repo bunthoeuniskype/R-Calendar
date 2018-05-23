@@ -28,7 +28,8 @@ export default class CalScreen extends React.Component {
       this.state = {      
        text: '',
         data:[],
-        progress: []       
+        progress: [],
+        open:false   
       };       
     }
     
@@ -46,6 +47,7 @@ export default class CalScreen extends React.Component {
               data:[]
         })
     }
+
 
   errorCB = (err) => {
     console.log('error: ', err)
@@ -101,6 +103,9 @@ export default class CalScreen extends React.Component {
   }
 
   loadAndQueryDB () {   
+    this.setState({
+      data:[]
+    })
     db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size, this.openCB, this.errorCB)
     db.transaction(function (txn) {        
         txn.executeSql('CREATE TABLE IF NOT EXISTS AppEvent(id INTEGER PRIMARY KEY NOT NULL,title VARCHAR(50), time VARCHAR(30),description VARCHAR(500))', []);
@@ -125,15 +130,27 @@ export default class CalScreen extends React.Component {
     const eventTitle = 'Lunch';
     const nowUTC = moment.utc();
   
-    return ( 
-        <View>       
-        <Button    
-            backgroundColor="#2089dc"       
+    return (    
+       <View style={{backgroundColor:'#ffffff',marginBottom:5}}>
+       <Button              
+            backgroundColor="#2089dc" 
+            marginLeft="0"
             onPress={ () => navigate('AddEvent') }
             title="បញ្ចួលប្រតិការណ៏ថ្មី"
-          /> 
-        <ScrollView>          
+         />    
+        <ScrollView style={{marginTop:15}}>          
           <Timeline
+            circleSize={20}
+            circleColor='rgb(45,156,219)'
+            lineColor='rgb(45,156,219)'
+            timeContainerStyle={{minWidth:52, marginTop: -5}}
+            timeStyle={{textAlign: 'center', backgroundColor:'#ff9797', color:'white', padding:5, borderRadius:13}}
+            descriptionStyle={{color:'gray',backgroundColor:'lightblue',padding:10,fontFamily:'khmer os battambang',borderRadius:10}}
+            innerCircle={'dot'}
+            separator='true'          
+            options={{
+              style:{padding:15}
+            }}          
             data={this.state.data}
           />
         </ScrollView>
