@@ -1,20 +1,17 @@
 import React, { Component } from 'react';
-import * as AddCalendarEvent from 'react-native-add-calendar-event';
 import {  
   ScrollView,
   View,
   Text,
   StyleSheet,
   TextInput,
-  ListView
+  ListView,
+  ActivityIndicator,
+  RefreshControl,YellowBox
 } from 'react-native';
-import moment from 'moment';
 import Timeline from 'react-native-timeline-listview';
 import SQLite from 'react-native-sqlite-2';
-import { Button } from 'react-native-elements';
-
-let momentInUTC = moment;
-
+import { Button,Header } from 'react-native-elements';
 const database_name = 'AppCalendar.db'
 const database_version = '1.0'
 const database_displayname = 'SQLite Test Database'
@@ -25,16 +22,23 @@ export default class CalScreen extends React.Component {
 
     constructor(props) {
       super(props);
-      this.state = {      
-       text: '',
+      YellowBox.ignoreWarnings(
+          ['Warning: isMounted(...) is deprecated', 'Module RCTImageLoader'      
+      ]);
+      this.state = {  
+        isRefreshing: false,      
+        waiting: false, 
         data:[],
         progress: [],
-        open:false   
+        skip:0
       };       
+      this.onEndReached = this.onEndReached.bind(this)
+      this.renderFooter = this.renderFooter.bind(this)
+      this.onRefresh = this.onRefresh.bind(this)
     }
     
     componentWillMount() {
-      this.loadAndQueryDB() ;
+     this.loadAndQueryDB() ;  
     }
   
     shouldComponentUpdate() {        
@@ -57,7 +61,7 @@ export default class CalScreen extends React.Component {
   }
 
   successCB = () => {
-    console.log('SQL executed ...')
+    //console.log('SQL executed ...')
   }
 
   openCB = () => {
@@ -71,7 +75,7 @@ export default class CalScreen extends React.Component {
   }
 
   deleteCB = () => {
-    console.log('Database DELETED')
+    //console.log('Database DELETED')
     this.state.progress.push('Database DELETED')
     this.setState(this.state)
   }
@@ -86,13 +90,17 @@ export default class CalScreen extends React.Component {
     })
   }
 
-  queryEvent = (tx) => {   
-    tx.executeSql('SELECT title, time, description FROM AppEvent order by id DESC',[],
+  queryEvent = (tx) => { 
+     olds = this.state.skip;
+    tx.executeSql('SELECT title, time, description FROM AppEvent order by id DESC LIMIT :skip,3',[olds],
       this.queryEventSuccess, this.errorCB)
+      this.setState({
+       skip :olds+1
+      })
   }
 
   queryEventSuccess = (tx, results) => {
-     this.state.progress.push('events data..')
+      this.state.progress.push('events data..')
       this.setState(this.state)
       var len = results.rows.length
       for (let i = 0; i < len; i++) {
@@ -103,9 +111,7 @@ export default class CalScreen extends React.Component {
   }
 
   loadAndQueryDB () {   
-    this.setState({
-      data:[]
-    })
+    
     db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size, this.openCB, this.errorCB)
     db.transaction(function (txn) {        
         txn.executeSql('CREATE TABLE IF NOT EXISTS AppEvent(id INTEGER PRIMARY KEY NOT NULL,title VARCHAR(50), time VARCHAR(30),description VARCHAR(500))', []);
@@ -115,8 +121,7 @@ export default class CalScreen extends React.Component {
 
   closeDatabase () {
     var that = this
-    if (db) {
-      console.log('Closing database ...')
+    if (db) {     
       that.state.progress.push('Closing database')
       that.setState(that.state)
     } else {
@@ -125,33 +130,70 @@ export default class CalScreen extends React.Component {
     }
   }
 
+  refresh = () => {   
+    this.setState({
+     skip :0,
+     data:[]
+    })  
+
+   this.loadAndQueryDB();
+  }
+
+  onRefresh(){
+   //initail data
+   this.setState({
+     skip :0,
+     data:[]
+    })  
+   this.loadAndQueryDB();
+  }
+
+  onEndReached() {     
+    this.loadAndQueryDB();      
+  }
+
+  renderFooter() {
+      //show loading indicator
+      if (this.state.waiting) {
+          return <ActivityIndicator />;
+      }
+  }
+
   render() {  
     const { navigate } = this.props.navigation;
-    const eventTitle = 'Lunch';
-    const nowUTC = moment.utc();
-  
+   
     return (    
-       <View style={{backgroundColor:'#ffffff',marginBottom:5}}>
-       <Button              
-            backgroundColor="#2089dc" 
-            marginLeft="0"
-            onPress={ () => navigate('AddEvent') }
-            title="បញ្ចួលប្រតិការណ៏ថ្មី"
-         />    
-        <ScrollView style={{marginTop:15}}>          
+       <View style={{backgroundColor:'#ffffff',marginBottom:5,flex:1}}>
+       <Header      
+        placement="left"
+        leftComponent={{ icon: 'arrow-back',title: 'ថ្ងៃនេះ', color: '#fff',onPress:() => this.props.navigation.goBack() }}
+        centerComponent={{ text: 'ប្រតិទិនខ្មែរ', style: { color: '#fff',fontSize:18 } }}
+        rightComponent={{ icon: 'bookmark', color: '#fff',onPress:() => navigate('AddEvent',{backRefresh:this.refresh.bind(this)}) }}
+        outerContainerStyles={styles.header}
+       />        
+      
+       <ScrollView style={{marginTop:15}}>          
           <Timeline
             circleSize={20}
             circleColor='rgb(45,156,219)'
             lineColor='rgb(45,156,219)'
-            timeContainerStyle={{minWidth:52, marginTop: -5}}
+            timeContainerStyle={{minWidth:52, paddingTop: 15}}
             timeStyle={{textAlign: 'center', backgroundColor:'#ff9797', color:'white', padding:5, borderRadius:13}}
             descriptionStyle={{color:'gray',backgroundColor:'lightblue',padding:10,fontFamily:'khmer os battambang',borderRadius:10}}
             innerCircle={'dot'}
             separator='true'          
             options={{
-              style:{padding:15}
-            }}          
+              refreshControl: (
+              <RefreshControl
+                refreshing={this.state.isRefreshing}
+                onRefresh={this.onRefresh}
+              />
+            ),
+            renderFooter: this.renderFooter,
+            onEndReached: this.onEndReached
+                      }}          
             data={this.state.data}
+            style={{padding:15}}
           />
         </ScrollView>
       </View>   

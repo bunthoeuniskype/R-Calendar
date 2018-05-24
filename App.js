@@ -266,14 +266,14 @@ class AppHome extends React.Component {
   render() {
     const { navigate } = this.props.navigation;
     return (      
-      <View>  
+      <View style={{backgroundColor:'#ffffff',flex:1}}>  
       <StatusBar
         backgroundColor="blue"
         barStyle="light-content"
       /> 
       <Header      
         placement="left"
-        leftComponent={{ icon: 'event',title: 'ថ្ងៃនេះ', color: '#fff',onPress:() => this.onToday() }}
+        leftComponent={{ icon: 'home',title: 'ថ្ងៃនេះ', color: '#fff',onPress:() => this.onToday() }}
         centerComponent={{ text: 'ប្រតិទិនខ្មែរ', style: { color: '#fff',fontSize:18 } }}
         rightComponent={{ icon: 'book', color: '#fff',onPress:() => navigate('CalAddNotification') }}
         outerContainerStyles={styles.header}
@@ -337,21 +337,17 @@ class AppHome extends React.Component {
             this.setModalVisible(false);
           }}>
           <View>
-            <Text style={styles.info}>
-               ពត៍មានអំពីថ្ងៃនីមួយៗ
-            </Text>               
+            <Header      
+              placement="left"
+              leftComponent={{ icon: 'arrow-back',text:'ត្រឡប់ក្រោយ', color: '#fff',onPress:() => this.setModalVisible(!this.state.modalVisible) }}
+              centerComponent={{ text: 'ពត៍មានអំពីថ្ងៃនីមួយៗ', style: { color: '#fff',fontSize:18 } }}         
+              outerContainerStyles={styles.header}
+             />                         
             </View>           
             <View>
                <MyListItem  
                   listArr={this.state.ArrEvent}
-                />     
-             <TouchableHighlight 
-                style={styles.btnModel}
-                onPress={() => {
-                  this.setModalVisible(!this.state.modalVisible);
-                }}>
-                <Text style={{color:'#ffffff'}}>ត្រឡប់ក្រោយ</Text>
-              </TouchableHighlight>        
+                />  
             </View>
         </Modal>
       </View>
@@ -448,8 +444,8 @@ const styles = StyleSheet.create({
 
 const MainApp = StackNavigator({
   Home:{screen:AppHome,navigationOptions:{ header: null }},
-  CalAddNotification:{screen:CalScreen,navigationOptions:{ title: 'ប្រតិទិនខ្មែរ',color:'#ffffff',backgroundColor:'#0050D1',fontFamily:'Khmer Os Battambang' }},  
-  AddEvent:{screen:AddEvent,navigationOptions:{ title: 'ប្រតិការណ៏',color:'#ffffff',backgroundColor:'#0050D1',fontFamily:'Khmer Os Battambang' }}
+  CalAddNotification:{screen:CalScreen,navigationOptions:{ header: null }},  
+  AddEvent:{screen:AddEvent,navigationOptions:{ header:null }}
 },{
   initialRouteName : 'Home'
 });

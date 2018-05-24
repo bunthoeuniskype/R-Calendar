@@ -3,13 +3,13 @@ import {
   ScrollView,
   View,
   Text,
-  StyleSheet
+  StyleSheet, YellowBox ,Platform
 } from 'react-native';
 import moment from 'moment';
-import { Button,FormLabel, FormInput, FormValidationMessage } from 'react-native-elements';
+import { Button,FormLabel, FormInput, FormValidationMessage,Header } from 'react-native-elements';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import SQLite from 'react-native-sqlite-2';
-// import CalScreen from './CalScreen';
+import ProgressDialog from './component/ProgressDialog';
 
 const database_name = 'AppCalendar.db'
 const database_version = '1.0'
@@ -36,6 +36,13 @@ const styles = {
     minHeight:500
   },labelShow:{
     fontSize:18,
+  },
+  labelMa:{
+    paddingLeft:15,
+    fontFamily:'khmer os battambang',
+    fontSize:22,
+    paddingBottom:10,
+    paddingTop:15
   }
 };
 const _formatTime = 'H:m';
@@ -45,9 +52,13 @@ export default class AddEvent extends React.Component {
 
     constructor(props) {
       super(props);
+      YellowBox.ignoreWarnings(
+          ['Warning: isMounted(...) is deprecated', 'Module RCTImageLoader'      
+      ]);
       this.state = { 
         date:moment().format(_formatDate),time:moment().format(_formatTime),description:null,
-        isDatePickerVisible: false,isTimePickerVisible:false
+        isDatePickerVisible: false,isTimePickerVisible:false,
+        clickBtn:true,showP:false
        };
        this.onDescription = this.onDescription.bind(this);
     }    
@@ -57,12 +68,6 @@ export default class AddEvent extends React.Component {
         description
     })    
   }
-
-  // componentWillMount(){
-  //    this.state = { 
-  //       date:moment().format(_formatDate),time:moment().format(_formatTime),description:null
-  //      };
-  // }
 
    _showDatePicker = () => this.setState({ isDatePickerVisible: true });
 
@@ -97,23 +102,27 @@ export default class AddEvent extends React.Component {
   }
 
   save = () =>{
-    db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size, this.openCB, this.errorCB) 
-    db.transaction((txn) => {
-      txn.executeSql('SELECT 1 FROM Version LIMIT 1',[], () => {  db.transaction(this.saveEvent, this.errorCB, () => { })},
-        (error) => { }
-      )
-    })   
+    if(this.state.clickBtn==true){
+      this.setState({clickBtn:false,showP:true})
+      db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size, this.openCB, this.errorCB) 
+      db.transaction((txn) => {
+        txn.executeSql('SELECT 1 FROM Version LIMIT 1',[], () => {  db.transaction(this.saveEvent, this.errorCB, () => { })},
+          (error) => { }
+        )
+      })   
+    }    
   } 
 
-  saveEvent = (txn) => {
+  saveEvent = (txn) => {     
       date = this.state.date;  
       time = this.state.time;
-      description = this.state.description; 
-     txn.executeSql('INSERT INTO AppEvent (title,time,description) VALUES(:title,:time,:description)', [date,time,description],this.backFun, this.errorCB);
+      description = this.state.description;       
+      txn.executeSql('INSERT INTO AppEvent (title,time,description) VALUES(:title,:time,:description)', [date,time,description],this.backFun, this.errorCB);
   }
 
-  backFun=()=>{
-   // CalScreen.loadAndQueryDB();
+  backFun=()=>{     
+     this.setState({showP:false}) 
+     this.props.navigation.state.params.backRefresh(this);
      this.props.navigation.goBack()
   }
 
@@ -134,9 +143,17 @@ export default class AddEvent extends React.Component {
 
   render() {     
     return (     
+      <View style={{backgroundColor:'#ffffff',marginBottom:5,flex:1}}>
+       <Header      
+        placement="left"
+        leftComponent={{ icon: 'arrow-back',title: 'ថ្ងៃនេះ', color: '#fff',onPress:() => this.props.navigation.goBack() }}
+        centerComponent={{ text: 'ប្រតិការណ៏', style: { color: '#fff',fontSize:18 } }}         
+        outerContainerStyles={styles.header}
+       />  
       <ScrollView>
         <View style={styles.container}> 
-        <FormLabel>កាលបរិច្ឆេទ : <Text style={styles.labelShow}> {this.state.date} </Text></FormLabel>
+        <ProgressDialog visible={this.state.showP} />
+        <Text style={styles.labelMa}> កាលបរិច្ឆេទ : <Text style={styles.labelShow}> {this.state.date} </Text></Text>
         <Button    
           raised
           style={styles.submitButton}
@@ -151,7 +168,7 @@ export default class AddEvent extends React.Component {
           onCancel={this._hideDatePicker}
         />
 
-         <FormLabel>ពេលវេលា​​ : <Text style={styles.labelShow}> {this.state.time}</Text></FormLabel>
+         <Text style={styles.labelMa}>ពេលវេលា​​ : <Text style={styles.labelShow}> {this.state.time}</Text> </Text>
          <Button    
           raised 
           style={styles.submitButton}
@@ -165,8 +182,9 @@ export default class AddEvent extends React.Component {
           onConfirm={this._handleTimePicked}
           onCancel={this._hideTimePicker}
         />
-        <FormLabel>ចំនាំ</FormLabel>
+        <Text style={styles.labelMa}> ចំនាំ</Text>
         <FormInput name="description" onChangeText={this.onDescription} placeholder="ចំនាំ" value={this.state.description}/>
+        <Text style={{padding:15}}>{this.state.description}</Text>
          <Button    
           backgroundColor="#2089dc"         
           style={styles.submitButton}
@@ -175,6 +193,7 @@ export default class AddEvent extends React.Component {
         />
         </View>        
       </ScrollView>
+      </View>    
     );
   }
 }
