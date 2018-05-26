@@ -11,12 +11,6 @@ import DateTimePicker from 'react-native-modal-datetime-picker';
 import SQLite from 'react-native-sqlite-2';
 import ProgressDialog from './component/ProgressDialog';
 
-const database_name = 'AppCalendar.db'
-const database_version = '1.0'
-const database_displayname = 'SQLite Test Database'
-const database_size = 200000;
-let db;
-
 const styles = {
   wrapper: {
     flex: 1,
@@ -48,10 +42,12 @@ const styles = {
 const _formatTime = 'H:m';
 const _formatDate = 'DD MMMM YYYY';
 
+
 export default class AddEvent extends React.Component {
 
     constructor(props) {
       super(props);
+
       YellowBox.ignoreWarnings(
           ['Warning: isMounted(...) is deprecated', 'Module RCTImageLoader'      
       ]);
@@ -97,28 +93,22 @@ export default class AddEvent extends React.Component {
     //open connect
   }
 
-  errorCB = () => {
+  errorCB = () => {    
    //error connect
   }
 
   save = () =>{
+    db = SQLite.openDatabase('app_kh.db', '1.0', '', 1);
     if(this.state.clickBtn==true){
       this.setState({clickBtn:false,showP:true})
-      db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size, this.openCB, this.errorCB) 
-      db.transaction((txn) => {
-        txn.executeSql('SELECT 1 FROM Version LIMIT 1',[], () => {  db.transaction(this.saveEvent, this.errorCB, () => { })},
-          (error) => { }
-        )
+      db.transaction((txn) => {    
+          date = this.state.date;  
+          time = this.state.time;
+          description = this.state.description; 
+          txn.executeSql('INSERT INTO event_tbl(title,time,description) VALUES(:title,:time,:description)', [date,time,description],this.backFun, this.errorCB);
       })   
     }    
   } 
-
-  saveEvent = (txn) => {     
-      date = this.state.date;  
-      time = this.state.time;
-      description = this.state.description;       
-      txn.executeSql('INSERT INTO AppEvent (title,time,description) VALUES(:title,:time,:description)', [date,time,description],this.backFun, this.errorCB);
-  }
 
   backFun=()=>{     
      this.setState({showP:false}) 
@@ -127,10 +117,10 @@ export default class AddEvent extends React.Component {
   }
 
   componentWillUnmount () {
-      this.closeDatabase();
-      this.setState = { 
-        date:null,time:null,description:null
-    };
+    //   this.closeDatabase();
+    //   this.setState = { 
+    //     date:null,time:null,description:null
+    // };
   }
 
   closeDatabase () {

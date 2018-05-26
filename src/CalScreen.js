@@ -12,19 +12,22 @@ import {
 import Timeline from 'react-native-timeline-listview';
 import SQLite from 'react-native-sqlite-2';
 import { Button,Header } from 'react-native-elements';
-const database_name = 'AppCalendar.db'
-const database_version = '1.0'
-const database_displayname = 'SQLite Test Database'
-const database_size = 200000;
-let db;
+
+const db1 = SQLite.openDatabase('app_kh.db', '1.0', '', 1);
+db1.transaction(function (txn) {  
+   //txn.executeSql('DROP TABLE IF EXISTS event_tbl', []);      
+   txn.executeSql('CREATE TABLE IF NOT EXISTS event_tbl(id INTEGER PRIMARY KEY NOT NULL,title VARCHAR(50), time VARCHAR(30),description VARCHAR(500))', []);     
+ 
+});
+
+function  errorCBd(err) {
+  console.warn("SQL Error: ", err);
+}
 
 export default class CalScreen extends React.Component {
 
     constructor(props) {
-      super(props);
-      YellowBox.ignoreWarnings(
-          ['Warning: isMounted(...) is deprecated', 'Module RCTImageLoader'      
-      ]);
+      super(props);     
       this.state = {  
         isRefreshing: false,      
         waiting: false, 
@@ -46,10 +49,10 @@ export default class CalScreen extends React.Component {
     }
      
     componentWillUnmount () {
-      this.closeDatabase();
-      this.setState({
-              data:[]
-        })
+      //this.closeDatabase();
+      // this.setState({
+      //         data:[]
+      //   })
     }
 
 
@@ -80,43 +83,29 @@ export default class CalScreen extends React.Component {
     this.setState(this.state)
   }
 
-  getEventCollection (db) {   
-    db.transaction((txn) => {
-      txn.executeSql(  'SELECT 1 FROM Version LIMIT 1',
-        [],
-        () => {  db.transaction(this.queryEvent, this.errorCB, () => { }) },
-        (error) => { }
-      )
-    })
+  getEventCollection (db) { 
+         olds = this.state.skip;
+         skip = olds*3;
+         db.transaction((txn) => {
+           txn.executeSql('SELECT * FROM event_tbl ORDER BY id DESC LIMIT :skip,3',[skip], this.queryEventSuccess, this.errorCB)
+         });  
+         this.setState({
+           skip :olds+1
+          })  
   }
 
-  queryEvent = (tx) => { 
-     olds = this.state.skip;
-    tx.executeSql('SELECT title, time, description FROM AppEvent order by id DESC LIMIT :skip,3',[olds],
-      this.queryEventSuccess, this.errorCB)
-      this.setState({
-       skip :olds+1
-      })
-  }
-
-  queryEventSuccess = (tx, results) => {
-      this.state.progress.push('events data..')
-      this.setState(this.state)
+  queryEventSuccess = (tx, results) => {  
       var len = results.rows.length
-      for (let i = 0; i < len; i++) {
-        let row = results.rows.item(i)   
+      for (let i = 0; i < len; i++) {    
+        let row = results.rows.item(i)        
         this.state.data.push({time: row.time, title: row.title, description:row.description})
       }
       this.setState(this.state)
   }
 
   loadAndQueryDB () {   
-    
-    db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size, this.openCB, this.errorCB)
-    db.transaction(function (txn) {        
-        txn.executeSql('CREATE TABLE IF NOT EXISTS AppEvent(id INTEGER PRIMARY KEY NOT NULL,title VARCHAR(50), time VARCHAR(30),description VARCHAR(500))', []);
-     });
-    this.getEventCollection(db);
+      db2 = SQLite.openDatabase('app_kh.db', '1.0', '', 200000);      
+      this.getEventCollection(db2);      
   }
 
   closeDatabase () {
