@@ -252,7 +252,12 @@ class AppHome extends React.Component {
     } 
 
    componentDidMount() {
-        SplashScreen.hide();
+         SplashScreen.close({
+            animationType: SplashScreen.animationType.scale,
+            duration: 850,
+            delay: 500,
+         })
+        // SplashScreen.hide();
     }
   
    shouldComponentUpdate() {        
