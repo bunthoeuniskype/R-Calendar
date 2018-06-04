@@ -13,6 +13,7 @@ import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
 
 import org.devio.rn.splashscreen.SplashScreenReactPackage;
+import com.sbugert.rnadmob.RNAdMobPackage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +33,7 @@ public class MainApplication extends Application implements ReactApplication {
             new RNSqlite2Package(),
             new AddCalendarEventPackage(),
             // new RCTSplashScreenPackage(),
+            new RNAdMobPackage(),
             new VectorIconsPackage(),
             new SplashScreenReactPackage()  //here            
       );

@@ -23,6 +23,12 @@ import {
 import { Header } from 'react-native-elements';
 import CalScreen from './src/CalScreen';
 import AddEvent from './src/AddEvent';
+import {
+  AdMobBanner,
+  AdMobInterstitial,
+  PublisherBanner,
+  AdMobRewarded,
+} from 'react-native-admob';
 
 class MyListItem extends React.Component {
 
@@ -252,12 +258,7 @@ class AppHome extends React.Component {
     } 
 
    componentDidMount() {
-         SplashScreen.close({
-            animationType: SplashScreen.animationType.scale,
-            duration: 850,
-            delay: 500,
-         })
-        // SplashScreen.hide();
+       SplashScreen.hide();
     }
   
    shouldComponentUpdate() {        
@@ -350,11 +351,21 @@ class AppHome extends React.Component {
              />                         
             </View>           
             <View>
+               <AdMobBanner
+                  adSize="fullBanner"
+                  adUnitID="ca-app-pub-7914755566051180/7596734900"
+                  onAdFailedToLoad={error => console.error(error)}
+                />   
                <MyListItem  
                   listArr={this.state.ArrEvent}
-                />  
+                />               
             </View>
         </Modal>
+        <AdMobBanner
+          adSize="fullBanner"
+          adUnitID="ca-app-pub-7914755566051180/7596734900"         
+          onAdFailedToLoad={error => console.error(error)}
+        />
       </View>
     );
   }

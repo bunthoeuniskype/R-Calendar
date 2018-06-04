@@ -3,6 +3,7 @@ package com.appcalendar;
 import com.facebook.react.ReactActivity;
 import android.os.Bundle; // here
 import org.devio.rn.splashscreen.SplashScreen; // here
+import com.google.android.gms.ads.MobileAds;
 
 public class MainActivity extends ReactActivity {
 
@@ -14,6 +15,7 @@ public class MainActivity extends ReactActivity {
     protected void onCreate(Bundle savedInstanceState) {
         SplashScreen.show(this);  // here
         super.onCreate(savedInstanceState);
+        MobileAds.initialize(this, "ca-app-pub-7914755566051180~8337711753");
     }
 
     @Override

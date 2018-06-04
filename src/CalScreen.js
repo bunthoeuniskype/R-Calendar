@@ -12,6 +12,12 @@ import {
 import Timeline from 'react-native-timeline-listview';
 import SQLite from 'react-native-sqlite-2';
 import { Button,Header } from 'react-native-elements';
+import {
+  AdMobBanner,
+  AdMobInterstitial,
+  PublisherBanner,
+  AdMobRewarded,
+} from 'react-native-admob';
 
 const db1 = SQLite.openDatabase('app_kh.db', '1.0', '', 1);
 db1.transaction(function (txn) {  
@@ -159,8 +165,7 @@ export default class CalScreen extends React.Component {
         centerComponent={{ text: 'ប្រតិទិនខ្មែរ', style: { color: '#fff',fontSize:18 } }}
         rightComponent={{ icon: 'bookmark', color: '#fff',onPress:() => navigate('AddEvent',{backRefresh:this.refresh.bind(this)}) }}
         outerContainerStyles={styles.header}
-       />        
-      
+       />  
        <ScrollView style={{marginTop:15}}>          
           <Timeline
             circleSize={20}
@@ -185,6 +190,11 @@ export default class CalScreen extends React.Component {
             style={{padding:15}}
           />
         </ScrollView>
+         <AdMobBanner
+             adSize="fullBanner"
+             adUnitID="ca-app-pub-7914755566051180/7596734900"
+            onAdFailedToLoad={error => console.error(error)}
+          />  
       </View>   
     );
   }
