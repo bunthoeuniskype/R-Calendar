@@ -23,6 +23,8 @@ import {
 import { Header } from 'react-native-elements';
 import CalScreen from './src/CalScreen';
 import AddEvent from './src/AddEvent';
+import Weather from './src/Weather';
+
 import {
   AdMobBanner,
   AdMobInterstitial,
@@ -333,8 +335,9 @@ class AppHome extends React.Component {
           customStyle={customStyle}  
           onDayPress={this.onDaySelect}
           markingType={'multi-dot'}
-          />             
-       </ScrollView> 
+          />  
+        <Weather />             
+       </ScrollView>        
        <Modal
           animationType="slide"
           transparent={false}
@@ -350,7 +353,7 @@ class AppHome extends React.Component {
               outerContainerStyles={styles.header}
              />                         
             </View>           
-            <View>
+            <View>            
                <AdMobBanner
                   adSize="fullBanner"
                   adUnitID="ca-app-pub-7914755566051180/7596734900"
@@ -360,7 +363,7 @@ class AppHome extends React.Component {
                   listArr={this.state.ArrEvent}
                 />               
             </View>
-        </Modal>
+        </Modal>        
         <AdMobBanner
           adSize="fullBanner"
           adUnitID="ca-app-pub-7914755566051180/7596734900"         
