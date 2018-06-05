@@ -39,28 +39,34 @@ export default class CalScreen extends React.Component {
         waiting: false, 
         data:[],
         progress: [],
-        skip:0
+        skip:0      
       };       
       this.onEndReached = this.onEndReached.bind(this)
       this.renderFooter = this.renderFooter.bind(this)
       this.onRefresh = this.onRefresh.bind(this)
     }
     
-    componentWillMount() {
-     this.loadAndQueryDB() ;  
-    }
-  
-    shouldComponentUpdate() {        
-      return true;
-    }
-     
-    componentWillUnmount () {
-      //this.closeDatabase();
-      // this.setState({
-      //         data:[]
-      //   })
+    componentWillMount() {      
+     this.loadAndQueryDB();  
     }
 
+    shouldComponentUpdate() {        
+      return true;
+    }    
+
+  _renderAdmobBanner(){     
+    let ads;
+    if(this.props.navigation.state.params.isConnected){
+      ads =  (
+         <AdMobBanner
+              adSize="fullBanner"
+              adUnitID="ca-app-pub-7914755566051180/7596734900"
+              onAdFailedToLoad={error => console.error(error)}
+            />   
+      );
+    }
+   return ads;
+  }
 
   errorCB = (err) => {
     console.log('error: ', err)
@@ -190,11 +196,7 @@ export default class CalScreen extends React.Component {
             style={{padding:15}}
           />
         </ScrollView>
-         <AdMobBanner
-             adSize="fullBanner"
-             adUnitID="ca-app-pub-7914755566051180/7596734900"
-            onAdFailedToLoad={error => console.error(error)}
-          />  
+         {this._renderAdmobBanner()}
       </View>   
     );
   }

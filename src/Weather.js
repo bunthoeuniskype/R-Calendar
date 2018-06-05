@@ -8,6 +8,7 @@ import {
   Image,
   ImageBackground,
   ToastAndroid,
+  NetInfo 
 } from 'react-native';
 
 // A mapping of Yahoo's Weather API code to icons
@@ -65,7 +66,7 @@ var GOOGLE_REVERSE_GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode
 var YAHOO_WEATHER_API_URL = "https://query.yahooapis.com/v1/public/yql?q=select%20item.condition%20from%20weather.forecast%20where%20woeid%20IN%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%22[PLACE]%22)&format=json";
 var FLICKR_API_URL = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=62b0d3557b84973209eb5c77c679b916&lat=[LAT]&lon=[LONG]&tags=[PLACE]&format=json";
 
-export default class Weather extends React.Component {
+class Weather extends React.Component {
     
     constructor(props) {
       super(props);
@@ -73,21 +74,30 @@ export default class Weather extends React.Component {
         geoloc: {latitude: 11.5564, longitude: 104.9282},//default in pp
         locality: null,
         condition: null,
-        images: null,
+        images: null
       };        
     
     }
-
-  // getInitialState() {
-  //   return {
-  //     geoloc: null,
-  //     locality: null,
-  //     condition: null,
-  //     images: null,
-  //   };
-  // }
   
-  componentDidMount() { 
+  componentDidMount() {
+    NetInfo.isConnected.addEventListener('connectionChange', this._handleConnectionChange);
+  }
+
+  componentWillUnmount() {
+    NetInfo.isConnected.removeEventListener('connectionChange', this._handleConnectionChange);
+  }
+
+  _handleConnectionChange = (isConnected) => {
+    if(isConnected){
+      this.getLoadData();
+    }    
+  };
+
+  shouldComponentUpdate() {        
+     return true;
+  }
+  
+  getLoadData() {     
      navigator.geolocation.getCurrentPosition(
       (initialPosition) => {
         this.setState({
@@ -261,3 +271,5 @@ var styles = StyleSheet.create({
     padding : 20,
   },
 });
+
+export default Weather;

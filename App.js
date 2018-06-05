@@ -10,7 +10,7 @@ import {
   Modal,
   Button,
   Dimensions,
-  TouchableHighlight  
+  TouchableHighlight,NetInfo
 } from 'react-native';
 import {LocaleConfig, Calendar, CalendarList, Agenda } from 'react-native-calendars';
 import moment from 'moment';
@@ -189,7 +189,8 @@ class AppHome extends React.Component {
        eventArr:[],  
        ArrEvent:[],
        status:false,
-       _today:_today
+       _today:_today,
+       connectionState: false
     };   
   }
 
@@ -259,17 +260,36 @@ class AppHome extends React.Component {
       })
     } 
 
-   componentDidMount() {
-       SplashScreen.hide();
-    }
-  
-   shouldComponentUpdate() {        
+  componentDidMount() {
+    SplashScreen.hide();
+    NetInfo.isConnected.addEventListener('connectionChange', this._handleConnectionChange);
+  }
+
+  componentWillUnmount() {
+    NetInfo.isConnected.removeEventListener('connectionChange', this._handleConnectionChange);
+  }
+
+  _handleConnectionChange = (isConnected) => {
+    this.setState({connectionState:isConnected});    
+  };
+
+  shouldComponentUpdate() {        
       return true;
     }
 
-   componentWillUnmount(){
-      
+  _renderAdmobBanner(){  
+    let ads;
+    if(this.state.connectionState){
+      ads =  (
+         <AdMobBanner
+              adSize="fullBanner"
+              adUnitID="ca-app-pub-7914755566051180/7596734900"
+              onAdFailedToLoad={error => console.error(error)}
+            />   
+      );
     }
+   return ads;
+  }
 
   render() {
     const { navigate } = this.props.navigation;
@@ -283,7 +303,7 @@ class AppHome extends React.Component {
         placement="left"
         leftComponent={{ icon: 'home',title: 'ថ្ងៃនេះ', color: '#fff',onPress:() => this.onToday() }}
         centerComponent={{ text: 'ប្រតិទិនខ្មែរ', style: { color: '#fff',fontSize:18 } }}
-        rightComponent={{ icon: 'book', color: '#fff',onPress:() => navigate('CalAddNotification') }}
+        rightComponent={{ icon: 'book', color: '#fff',onPress:() => navigate('CalAddNotification',{isConnected:this.state.connectionState}) }}
         outerContainerStyles={styles.header}
       />  
     
@@ -336,7 +356,7 @@ class AppHome extends React.Component {
           onDayPress={this.onDaySelect}
           markingType={'multi-dot'}
           />  
-        <Weather />             
+        <Weather isConnected={this.state.connectionState} />             
        </ScrollView>        
        <Modal
           animationType="slide"
@@ -354,21 +374,13 @@ class AppHome extends React.Component {
              />                         
             </View>           
             <View>            
-               <AdMobBanner
-                  adSize="fullBanner"
-                  adUnitID="ca-app-pub-7914755566051180/7596734900"
-                  onAdFailedToLoad={error => console.error(error)}
-                />   
+              {this._renderAdmobBanner()}
                <MyListItem  
                   listArr={this.state.ArrEvent}
                 />               
             </View>
         </Modal>        
-        <AdMobBanner
-          adSize="fullBanner"
-          adUnitID="ca-app-pub-7914755566051180/7596734900"         
-          onAdFailedToLoad={error => console.error(error)}
-        />
+        {this._renderAdmobBanner()}
       </View>
     );
   }
